@@ -443,9 +443,6 @@ class Bodyy extends StatelessWidget {
       job: 'Hair stylish',
     ),
 
-
-
-
   ];
    Bodyy({Key? key}) : super(key: key);
 
@@ -455,31 +452,27 @@ class Bodyy extends StatelessWidget {
   
   Widget build(BuildContext context) {
    return
-
-
    Container(
      height: 130,
      child: ListView.separated(
        padding: EdgeInsets.all(6),
         scrollDirection: Axis.horizontal,
          itemCount: employees.length,
-       separatorBuilder: (context, _) => SizedBox(width: 18,),
+       separatorBuilder: (context, _) => SizedBox(width: 18),
        itemBuilder: (context,index) => buildCard(employees: employees[index]),
 
      ),
    );
-
   }
 
   Widget buildCard({
   required Employee employees,
-}) => Container(
+  }) => Container(
     width: 113,
-   
     child: Column(
       children: [
         Expanded(
-          child:  AspectRatio(
+          child: AspectRatio(
             aspectRatio: 4/3,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(60),
@@ -488,25 +481,21 @@ class Bodyy extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            
           ),),
 
         const SizedBox(height: 4,),
         Text(
           employees.name,
-          style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,),
+          style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 4,),
+        const SizedBox(height: 4),
         Text(
           employees.job,
-          style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold,),
+          style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold),
         ),
-
       ],
-
     ),
   );
-
 }
 
 class Bodyy2 extends StatelessWidget {

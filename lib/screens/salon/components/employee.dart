@@ -6,6 +6,7 @@ import '../../../constants.dart';
 import '../../../size_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
+import '../salon_screen.dart';
 import 'employee_page.dart';
 
 
@@ -120,7 +121,7 @@ class _employeeState extends State<employee> {
                     backgroundColor: kPrimaryColor,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder:(context) => employee()) ),
                 ),
               ],
             ),
@@ -136,6 +137,7 @@ class _employeeState extends State<employee> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    drawer: NavigationDrawer(),
     appBar: AppBar(title: const Text('employees')),
     body: circular
         ? Center(child: CircularProgressIndicator())

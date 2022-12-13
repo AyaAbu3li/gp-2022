@@ -272,6 +272,16 @@ class _makeOfferState extends State<makeOffer> {
         initialDateRange: dateRange,
         firstDate: DateTime.now(),
         lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.purpleAccent, // <-- SEE HERE
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (newDateRange == null) return;

@@ -228,10 +228,7 @@ class _HomeState extends State<Home> {
                   SectionTitle(
                       text: "Salons",
                       press: (){
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => AllSalonPage()));
-                        NavigationDestination(icon: Icon(Icons.storefront,color: Colors.black87,size: 35,),
-                            selectedIcon: Icon(Icons.storefront_rounded,color: Colors.purple,size: 38,),label: 'Salons');
-
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => AllSalonPage()));
                       }
                   ),
                   SizedBox(height: getProportionateScreenWidth(10)),

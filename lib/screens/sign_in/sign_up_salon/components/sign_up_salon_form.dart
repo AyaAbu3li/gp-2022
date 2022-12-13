@@ -126,7 +126,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
     }
   }
 
-  Salon salon = Salon('', '','','', '','','','','');
+  Salon salon = Salon('', '','','', '','','','','','','');
   String errorPhoneImg ="assets/icons/white.svg";
   String phone ='';
   String email="";

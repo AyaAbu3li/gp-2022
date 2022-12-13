@@ -14,7 +14,7 @@ class salonsdetails extends StatefulWidget {
 State<salonsdetails> createState() => _salonsdetailsState();
 }
 class _salonsdetailsState extends State<salonsdetails> {
-  Salon salon = Salon('','','','','','','','','');
+  Salon salon = Salon('','','','','','','','','','','');
   bool circular = true;
   @override
   void initState() {

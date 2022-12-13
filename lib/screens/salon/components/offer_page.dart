@@ -15,7 +15,7 @@ class Offer_Page extends StatefulWidget {
 class _OfferPageRequestState extends State<Offer_Page> {
   List<Service> service = [];
 
-  Offer offer = Offer('','','','','','','');
+  Offer offer = Offer('','','','','','','','','');
   bool circular = true;
   @override
   void initState() {

@@ -7,6 +7,8 @@ class Offer {
    String Salon;
    String id;
    String services;
+   String enddate;
+   String startdate;
 
    Offer(
      this.name,
@@ -16,6 +18,8 @@ class Offer {
      this.role,
      this.id,
      this.services,
+    this.startdate,
+    this.enddate,
   );
 
 }

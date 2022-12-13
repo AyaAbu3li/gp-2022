@@ -67,6 +67,7 @@ class _MyAccountState extends State<MyAccount> {
             'city': valueChoose,
             'picture': user.picture
           });
+      global.city = valueChoose;
       showDialog(
         context: context,
         builder: (context) =>
@@ -90,7 +91,7 @@ class _MyAccountState extends State<MyAccount> {
       );
 
     } catch(e){
-      print(" hiiii");
+      print(" edit account");
       print(e);
     }
   }

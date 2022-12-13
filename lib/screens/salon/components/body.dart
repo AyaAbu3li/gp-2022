@@ -285,10 +285,10 @@ class _BodyState extends State<Body> {
                     Expanded(
                       child: InkWell(
                         onTap:() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const Booking(),
-                          )
-                          );
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //   builder: (context) => const Booking(),
+                          // )
+                          // );
                         },
                         child: Container(
                           child: Column(

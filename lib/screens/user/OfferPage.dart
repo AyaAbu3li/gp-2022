@@ -15,7 +15,7 @@ class _OfferPageRequestState extends State<OfferPage> {
 
   List<Service> service = [];
 
-  Offer offer = Offer('','','','','','','');
+  Offer offer = Offer('','','','','','','','','');
   bool circular = true;
   @override
   void initState() {
@@ -36,6 +36,8 @@ class _OfferPageRequestState extends State<OfferPage> {
       offer.name = decoded['name'];
       offer.Salon = decoded['salonname'];
       offer.id = decoded['_id'];
+      offer.enddate = decoded['enddate'];
+      offer.startdate = decoded['startdate'];
     });
     var res2 = await http.get(Uri.parse("http://"+ip+":3000/offerservices/"+offer.id),
         headers: <String, String>{
@@ -115,7 +117,7 @@ class _OfferPageRequestState extends State<OfferPage> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Text(
-                        "From "+"30/11/2022"+" to "+"30/12/2022",
+                        "From "+offer.startdate+" to "+offer.enddate,
                         style: TextStyle(fontSize: 17 ,color: Colors.purple),
                       ),
                     ),

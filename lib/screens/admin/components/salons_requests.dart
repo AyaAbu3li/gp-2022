@@ -16,6 +16,7 @@ State<SalonsRequests> createState() => _SalonsRequestsState();
 class _SalonsRequestsState extends State<SalonsRequests> {
   List<Saloon> saloon = [];
   bool circular = true;
+  bool empty = false;
 
   @override
   void initState() {
@@ -35,28 +36,30 @@ class _SalonsRequestsState extends State<SalonsRequests> {
         this.saloon = data.map<Saloon>(Saloon.fromJson).toList();
         saloon.removeWhere((data) => data.role != 4);
         if(saloon.isEmpty){
-          showDialog(
-            context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text('come back later'),
-                  content: Text("There are no salon requests at the moment"),
-                  actions: [
-                    TextButton(
-                      child: Text('OK',
-                          style: TextStyle(
-                            fontSize: getProportionateScreenWidth(14),
-                            color: Colors.white,)),
-                      style: TextButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),
-                      onPressed: () =>  Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => adminScreen())),
-                    ),
-                  ],
-                ),
-          );
+           empty = true;
+
+        // showDialog(
+          //   context: context,
+          //   builder: (context) =>
+          //       AlertDialog(
+          //         title: Text('come back later'),
+          //         content: Text("There are no salon requests at the moment"),
+          //         actions: [
+          //           TextButton(
+          //             child: Text('OK',
+          //                 style: TextStyle(
+          //                   fontSize: getProportionateScreenWidth(14),
+          //                   color: Colors.white,)),
+          //             style: TextButton.styleFrom(
+          //               backgroundColor: kPrimaryColor,
+          //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          //             ),
+          //             onPressed: () =>  Navigator.push(
+          //                 context, MaterialPageRoute(builder: (context) => adminScreen())),
+          //           ),
+          //         ],
+          //       ),
+          // );
         }
           circular = false;
       });
@@ -70,13 +73,15 @@ class _SalonsRequestsState extends State<SalonsRequests> {
     return Scaffold(
       drawer: NavigationDrawer(),
       appBar: AppBar(
-        title: const Text('Requests')),
+        title: const Text('Salon Requests')),
       body:circular
           ? Center(child: CircularProgressIndicator())
-          : Padding(
+          : empty
+      ? Center(child: Text("No Requests yet!",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
+        :Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Container(
-          child: buildSalons(saloon),
+          child: Container(
+            child: buildSalons(saloon),
         ),
       ),
     );

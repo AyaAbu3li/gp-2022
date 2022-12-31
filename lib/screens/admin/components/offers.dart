@@ -14,6 +14,7 @@ State<offers> createState() => _offersState();
 class _offersState extends State<offers> {
   List<Offer> offer = [];
   bool circular = true;
+  bool empty = false;
 
   @override
   void initState() {
@@ -33,28 +34,7 @@ class _offersState extends State<offers> {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 0);
         if(offer.isEmpty){
-          showDialog(
-            context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text('come back later'),
-                  content: Text("There are no offers at the moment"),
-                  actions: [
-                    TextButton(
-                      child: Text('OK',
-                          style: TextStyle(
-                            fontSize: getProportionateScreenWidth(14),
-                            color: Colors.white,)),
-                      style: TextButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),
-                      onPressed: () =>  Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => adminScreen())),
-                    ),
-                  ],
-                ),
-          );
+           empty = true;
         }
         circular = false;
       });
@@ -74,7 +54,9 @@ Widget build(BuildContext context) {
     ),
     body: circular
         ? Center(child: CircularProgressIndicator())
-        :  Column(
+        : empty
+        ? Center(child: Text("There are no offers\n at the moment",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
+        : Column(
       children: [
         Expanded(
           child: Padding(

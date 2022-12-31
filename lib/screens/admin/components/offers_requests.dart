@@ -14,6 +14,7 @@ class offerRequests extends StatefulWidget {
 class _offerRequestsState extends State<offerRequests> {
   List<Offer> offer = [];
   bool circular = true;
+  bool empty = false;
 
   @override
   void initState() {
@@ -33,28 +34,30 @@ class _offerRequestsState extends State<offerRequests> {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 1);
         if(offer.isEmpty){
-          showDialog(
-            context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text('come back later'),
-                  content: Text("There are no offer requests at the moment"),
-                  actions: [
-                    TextButton(
-                      child: Text('OK',
-                          style: TextStyle(
-                            fontSize: getProportionateScreenWidth(14),
-                            color: Colors.white,)),
-                      style: TextButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),
-                      onPressed: () =>  Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => adminScreen())),
-                    ),
-                  ],
-                ),
-          );
+           empty = true;
+
+          // showDialog(
+          //   context: context,
+          //   builder: (context) =>
+          //       AlertDialog(
+          //         title: Text('come back later'),
+          //         content: Text("There are no offer requests at the moment"),
+          //         actions: [
+          //           TextButton(
+          //             child: Text('OK',
+          //                 style: TextStyle(
+          //                   fontSize: getProportionateScreenWidth(14),
+          //                   color: Colors.white,)),
+          //             style: TextButton.styleFrom(
+          //               backgroundColor: kPrimaryColor,
+          //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          //             ),
+          //             onPressed: () =>  Navigator.push(
+          //                 context, MaterialPageRoute(builder: (context) => adminScreen())),
+          //           ),
+          //         ],
+          //       ),
+          // );
         }
         circular = false;
       });
@@ -68,18 +71,13 @@ class _offerRequestsState extends State<offerRequests> {
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.purple.shade300,
-        elevation: 0,
-        title: const Text(
-          'Offer requests',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body:  Column(
+      appBar: AppBar(title: const Text('Offer requests')),
+      body:circular
+          ? Center(child: CircularProgressIndicator())
+          : empty
+          ? Center(child: Text("No Requests yet!",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
+          :  Column(
         children: [
-          // SizedBox(height: 10,),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all( 15,),

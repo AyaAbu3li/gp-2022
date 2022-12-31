@@ -69,12 +69,7 @@ Widget build(BuildContext context) {
     backgroundColor: Colors.white,
     extendBodyBehindAppBar: true,
     appBar: AppBar(
-      backgroundColor: Colors.purple.shade300,
-      elevation: 0,
-      title: const Text(
-        'All Offers',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
+      title: const Text('All Offers' ),
       centerTitle: true,
     ),
     body: circular

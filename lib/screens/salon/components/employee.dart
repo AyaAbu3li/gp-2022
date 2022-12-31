@@ -44,48 +44,6 @@ class _employeeState extends State<employee> {
         this.employees = data.map<Employee>(Employee.fromJson).toList();
         circular = false;
       });
-// employees = [
-//         Employee(
-//           picture:
-//           'assets/images/emp.png',
-//           name: 'Mary Ali',
-//           job: 'Salon Admin',
-//           id: ''
-//         ),
-//
-//         Employee(
-//           picture:
-//           'assets/images/emp3.png',
-//           name: 'Yara Ahmad',
-//           job: 'Hair stylish',
-//             id: ''
-//         ),
-//
-//         Employee(
-//           picture:
-//           'assets/images/emp.png',
-//           name: 'Aya Abu Ali',
-//           job: 'Hair stylish',
-//             id: ''
-//         ),
-//
-//         Employee(
-//           picture:
-//           'assets/images/emp3.png',
-//           name: 'Aya Abu Ali',
-//           job: 'Hair stylish',
-//             id: ''
-//         ),
-//
-//         Employee(
-//           picture:
-//           'assets/images/emp.png',
-//           name: 'Aya Abu Ali',
-//           job: 'Hair stylish',
-//             id: ''
-//         ),
-//
-//       ];
     } catch(e){
       print(" hiiii");
       print(e);

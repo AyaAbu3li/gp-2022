@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:purple/screens/admin/components/salons_details.dart';
 import '../../../Model/salon.dart';
 import '../../../components/default_button.dart';
 import '../../../constants.dart';
@@ -161,7 +162,7 @@ class _accountState extends State<account> {
           return Scaffold(
               drawer: NavigationDrawer(),
               appBar: AppBar(
-                title: const Text('Account'),
+                title: Text('Account'),
               ),
               body: circular
                   ? Center(child: CircularProgressIndicator())
@@ -226,13 +227,28 @@ class _accountState extends State<account> {
 
                               SizedBox(width: 50.0),
 
-                              Text(salon.name,
+                              Text('view as',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                               ),
+                              SizedBox(width: 5.0),
+                              IconButton(
+                                iconSize: 35,
+                                color: Colors.purple.shade500,
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => salonsdetails(salon.id),
+                                  )
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.remove_red_eye_outlined,
+                                ),
+                              )
+
                             ],
                             ),
 

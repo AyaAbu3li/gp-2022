@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:purple/Model/Rating.dart';
 import 'package:purple/Model/category.dart';
 import 'package:purple/components/default_button.dart';
 import 'package:purple/size_config.dart';
@@ -11,9 +12,10 @@ import 'AllSalonPage.dart';
 import 'BookingScreen.dart';
 import 'Feedbackk.dart';
 import 'HomeScreen.dart';
-import 'Serv.dart';
+import '../../Model/Serv.dart';
 import '../../../Model/salon.dart';
 import 'package:http/http.dart' as http;
+import 'dart:math';
 
 class SalonPage extends StatefulWidget {
   final String text;
@@ -29,10 +31,11 @@ class _SalonPageState extends State<SalonPage> {
   List<Category> cate = [];
   List<Servicee> serviceee = [];
   List<Servicee> serviceeCategory = [];
+  List<Rating> RatingS = [];
 
   bool serviceempty = false;
   bool empEmpty = false;
-
+  double num = 0;
   bool circular = true;
 
   @override
@@ -45,6 +48,7 @@ class _SalonPageState extends State<SalonPage> {
     var data2;
     var cat;
     var ser;
+    var rat;
     try{
     var res = await http.get(Uri.parse("http://"+ip+":3000/salons/"+widget.text),
       headers: <String, String>{
@@ -106,6 +110,28 @@ class _SalonPageState extends State<SalonPage> {
       }
     });
 
+    var res5 = await http.get(Uri.parse("http://"+ip+":3000/rating/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    rat = json.decode(res5.body);
+    setState(() {
+      this.RatingS = rat.map<Rating>(Rating.fromJson).toList();
+      if(RatingS.isEmpty){
+        num = 0;
+        return;
+      }
+      print(RatingS.length);
+      print(RatingS[0].rating);
+
+      for(int i=0; i<RatingS.length; i++){
+          items.add(RatingS[i].rating);
+        }
+      num = items.reduce(max);
+
+    });
+
         circular = false;
 
     } catch(e){
@@ -132,7 +158,7 @@ class _SalonPageState extends State<SalonPage> {
 
   }
 
-  // List<String> items = [];
+  List<double> items = [];
 
 
   late String currentCategory;
@@ -184,7 +210,7 @@ class _SalonPageState extends State<SalonPage> {
 
                      SizedBox(height: 10),
                      SizedBox(height: 50,
-                       // child:
+                       child:
                        // bulidRating(),
                        // RatingBar.builder(
                        //   initialRating: 3.5,
@@ -205,10 +231,19 @@ class _SalonPageState extends State<SalonPage> {
                        //      });
                        //   },
                        // ),
+                         RatingBarIndicator(
+                             rating: this.num,
+                             itemCount: 5,
+                             itemSize: 30.0,
+                             itemBuilder: (context, _) => const Icon(
+                               Icons.star,
+                               color: Colors.amber,
+                             )
+                         )
                      ),
 
-
-                     ElevatedButton(
+                     serviceempty ? SizedBox(height: getProportionateScreenWidth(1))
+                     :ElevatedButton(
                        onPressed: (){
                          Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen()));
                        },

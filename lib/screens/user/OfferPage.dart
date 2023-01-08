@@ -97,7 +97,9 @@ class _OfferPageRequestState extends State<OfferPage> {
                     Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: Text(
-                        "₪"+ offer.price,
+                        "₪"
+                            + offer.price
+                        ,
                         style: TextStyle(fontSize: 26,),
                       ),
                     ),
@@ -169,7 +171,11 @@ class _OfferPageRequestState extends State<OfferPage> {
             children: [
               Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Text(saloon.name,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.black))
+                  child: Text(saloon.name,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black))
               ),
             ],
           ),

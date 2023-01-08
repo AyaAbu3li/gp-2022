@@ -20,8 +20,9 @@ class _accountState extends State<account> {
   final _formKey = GlobalKey<FormState>();
   _accountState(){
     valueChoose= listItem[0];
+    valueChoose2= listItem2[0];
   }
-  Salon salon = Salon('','','','','','','','','','','');
+  Salon salon = Salon('','','','','','','','','','','','');
 
   bool circular = true;
   String errorPhoneImg ="assets/icons/white.svg";
@@ -29,6 +30,12 @@ class _accountState extends State<account> {
   String namme ='';
   String errorNameImg ="assets/icons/white.svg";
   String valueChoose = "Jenin";
+  String valueChoose2 = "Monday";
+
+  final listItem2 = [
+    "Monday", "Tuesday" , "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  ];
+
   final listItem = [
     "Jenin", "Nablus" , "Ramallah", "Tullkarm", "Tubas", "Hebron", "Qalqelia"
   ];
@@ -56,6 +63,7 @@ class _accountState extends State<account> {
     salon.name = decoded['name'];
     salon.email = decoded['email'];
     valueChoose = decoded['city'];
+    valueChoose2 = decoded['holiday'];
     salon.picture = decoded['picture'];
     salon.phone = decoded['phone'].toString();
     salon.googlemaps = decoded['googlemaps'];
@@ -80,12 +88,26 @@ class _accountState extends State<account> {
           'name': salon.name,
           'phone': salon.phone,
           'city': valueChoose,
+          'holiday': valueChoose2,
           'address': salon.address,
           'googlemaps': salon.googlemaps,
           'openTime': salon.openTime,
           'closeTime': salon.closeTime,
           // 'picture': user.picture
         });
+      var res2 = await http.patch(Uri.parse("http://"+ip+":3000/users/me"),
+          headers: <String, String>{
+            'Context-Type': 'application/json;charSet=UTF-8',
+            'Authorization': global.token
+          },
+          body: <String, String>{
+            'name': salon.name,
+            'phone': salon.phone,
+            'city': valueChoose,
+            'address': salon.address,
+            // 'picture': user.picture
+          });
+
     showDialog(
       context: context,
       builder: (context) =>
@@ -555,6 +577,48 @@ class _accountState extends State<account> {
                                 ),
                               ),
                             ),
+                            SizedBox(height: 20.0),
+                            Row(children: [
+                              Text('Excluded day',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                            ),
+                            SizedBox(height: 10),
+                            DropdownButtonFormField(
+                              isExpanded: true,
+                              hint: Text("Excluded day"),
+                              icon: const Icon(
+                                Icons.arrow_drop_down_circle,
+                                color: Colors.purple,
+                              ),
+                              dropdownColor: Colors.deepPurple.shade50,
+                              decoration: InputDecoration(
+                                labelText: 'Excluded day',
+                                labelStyle: TextStyle(color: Colors.black),
+                                prefixIcon: Icon(
+                                  Icons.today_sharp,
+                                  color: Colors.purple,
+                                ),
+                              ),
+                              value: valueChoose2,
+                              onChanged: (newValue2) {
+                                setState(() {
+                                  valueChoose2 = newValue2 as String;
+                                });
+                              },
+                              items: listItem2.map((valueItem) =>
+                                  DropdownMenuItem(
+                                    value: valueItem,
+                                    child: Text(valueItem),
+                                  )
+                              ).toList(),
+                            ),
+
                             SizedBox(height: 20.0),
                             Row(children: [
                               Text('google maps link',

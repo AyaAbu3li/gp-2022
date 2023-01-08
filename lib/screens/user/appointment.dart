@@ -77,11 +77,7 @@ class _AppointmentState extends State<Appointment> {
         appBar: AppBar(
           backgroundColor: Colors.purple.shade300,
           elevation: 10,
-          title: const Text('My Appointment ',
-            style: TextStyle(fontSize: 18,
-            // fontWeight: FontWeight.bold
-            ),
-          ),
+          title: const Text('My Appointment '),
           centerTitle: true,
           bottom: TabBar(
               tabs: [

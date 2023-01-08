@@ -21,6 +21,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Offer> offer = [];
   bool circular = true;
+  bool offerempty = false;
+  bool offernum = false;
+
+  bool salonempty = false;
+  bool salonnum = false;
+  bool salonCitynum = false;
+
   List<Salon> saloon = [];
   List<Salon> citySaloon = [];
 
@@ -44,11 +51,14 @@ class _HomeState extends State<Home> {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 0);
         if(offer.isEmpty){
-
+           offerempty = true;
+        }
+        if(offer.length > 2){
+          offernum = true;
         }
       });
     } catch(e){
-      print(" hiiii");
+      print("Alloffers");
       print(e);
     }
   }
@@ -68,6 +78,16 @@ class _HomeState extends State<Home> {
 
         this.saloon = data.map<Salon>(Salon.fromJson).toList();
         saloon.removeWhere((data) => data.role == 4);
+
+        if(citySaloon.isEmpty){
+          salonempty = true;
+        }
+        if(saloon.length > 2){
+          salonnum = true;
+        }
+        if(citySaloon.length > 2){
+          salonCitynum = true;
+        }
 
         circular = false;
       });
@@ -159,9 +179,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
 
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
 
               Padding(
                 padding: EdgeInsets.only(left: 7,right: 16),
@@ -171,9 +189,7 @@ class _HomeState extends State<Home> {
                   fontSize: 26),),
               ),
 
-              const SizedBox(
-                height: 30,
-              ),
+              const SizedBox(height: 30),
               
               Padding(
                   padding: EdgeInsets.symmetric(
@@ -192,39 +208,55 @@ class _HomeState extends State<Home> {
                   SizedBox(
                     height: getProportionateScreenWidth(8),
                   ),
-                  SingleChildScrollView(
+                  offerempty
+                      ? Center(child:
+                        Text("No offers right now",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey)))
+                      :SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        buildOffers(offer),
-                        SizedBox(width: getProportionateScreenWidth(30)),
-                      ],
-                    ),
+                        child: Row(
+                          children: [
+                            buildOffers(offer),
+                            SizedBox(width: getProportionateScreenWidth(30)),
+                          ],
+                        ),
                   ),
                   SizedBox(
                     height: getProportionateScreenWidth(10),
                   ),
-                  SectionTitle(
-                      text: "Special Salons for you ",
-                      press: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => NewSalonsPage()));
-                      }
-                  ),
-                  SizedBox(
-                    height: getProportionateScreenWidth(10),
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                       ...List.generate(citySaloon.length, (index) =>
-                           SalonCard(salon: citySaloon[index],
-                       )
-                       ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: getProportionateScreenWidth(30)),
+                  !salonempty ? Column(
+                    children: [
+                      SectionTitle(
+                          text: "Special Salons for you ",
+                          press: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => NewSalonsPage()));
+                          }
+                      ),
+
+                      SizedBox(
+                        height: getProportionateScreenWidth(10),
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ...List.generate(salonCitynum ? 3
+                                : citySaloon.length,
+                                    (index) =>
+                                SalonCard(salon: citySaloon[index],
+                                )
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: getProportionateScreenWidth(30)),
+                    ],
+                  )
+                 :SizedBox(height: getProportionateScreenWidth(1)),
+
                   SectionTitle(
                       text: "Salons",
                       press: (){
@@ -236,7 +268,9 @@ class _HomeState extends State<Home> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        ...List.generate(saloon.length, (index) =>
+                        ...List.generate(salonnum ? 3
+                            : saloon.length,
+                                (index) =>
                             SalonCard(salon: saloon[index])
                         ),
                       ],
@@ -276,7 +310,8 @@ class _HomeState extends State<Home> {
     width: getProportionateScreenWidth(420),
     child: ListView.builder(
       scrollDirection: Axis.horizontal,
-      itemCount: offerrss.length,
+      itemCount: offernum ? 3
+          : offerrss.length,
       itemBuilder: (context,index){
         final offerr = offerrss[index];
         return SpesialOfferCard(

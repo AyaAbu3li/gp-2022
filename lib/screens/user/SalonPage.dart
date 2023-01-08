@@ -1,489 +1,761 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:purple/Model/category.dart';
+import 'package:purple/components/default_button.dart';
+import 'package:purple/size_config.dart';
+import '../../constants.dart';
+import 'package:purple/screens/user/services.dart';
+import 'AllSalonPage.dart';
+import 'BookingScreen.dart';
 import 'Feedbackk.dart';
-import 'ServicePage.dart';
+import 'HomeScreen.dart';
+import 'Serv.dart';
+import '../../../Model/salon.dart';
+import 'package:http/http.dart' as http;
 
 class SalonPage extends StatefulWidget {
   final String text;
   const SalonPage(this.text);
+
   @override
   State<SalonPage> createState() => _SalonPageState();
 }
+
 class _SalonPageState extends State<SalonPage> {
+  Salon salon = Salon('','','','','','','','','','','','');
+  List<Employee> employees = [];
+  List<Category> cate = [];
+  List<Servicee> serviceee = [];
+  List<Servicee> serviceeCategory = [];
+
+  bool serviceempty = false;
+  bool empEmpty = false;
+
+  bool circular = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+    void fetchData() async {
+    var data2;
+    var cat;
+    var ser;
+    try{
+    var res = await http.get(Uri.parse("http://"+ip+":3000/salons/"+widget.text),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    setState(() {
+      var decoded = json.decode(res.body);
+      salon.name = decoded['name'];
+      salon.email = decoded['email'];
+      salon.picture = decoded['picture'];
+      salon.city = decoded['city'];
+      salon.phone = decoded['phone'].toString();
+      salon.closeTime = decoded['closeTime'];
+      salon.holiday = decoded['holiday'];
+      salon.openTime = decoded['openTime'];
+      salon.address = decoded['address'];
+      salon.googlemaps = decoded['googlemaps'];
+    });
+
+    var res2 = await http.get(Uri.parse("http://"+ip+":3000/employee/"+salon.name),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    data2 = json.decode(res2.body);
+    setState(() {
+      this.employees = data2.map<Employee>(Employee.fromJson).toList();
+      if(employees.isEmpty){
+        empEmpty = true;
+      }
+
+    });
+
+    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    cat = json.decode(res3.body);
+
+    setState(() {
+      this.cate = cat.map<Category>(Category.fromJson).toList();
+      currentCategory = cate[0].category;
+    });
+
+    var res4 = await http.get(Uri.parse("http://"+ip+":3000/services/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    ser = json.decode(res4.body);
+    setState(() {
+      this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
+      this.serviceeCategory = ser.map<Servicee>(Servicee.fromJson).toList();
+      serviceeCategory.removeWhere((data) => data.category != currentCategory);
+      if(serviceee.isEmpty){
+        serviceempty = true;
+      }
+    });
+
+        circular = false;
+
+    } catch(e){
+      print(" hiiii");
+      print(e);
+    }
+  }
+
+  void fun() async {
+    var ser;
+
+    var res4 = await http.get(Uri.parse("http://"+ip+":3000/services/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    ser = json.decode(res4.body);
+    setState(() {
+      this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
+      this.serviceeCategory = ser.map<Servicee>(Servicee.fromJson).toList();
+      serviceeCategory.removeWhere((data) => data.category != currentCategory);
+
+    });
+
+  }
+
+  // List<String> items = [];
+
+
+  late String currentCategory;
+  int current = 0;
+  double rating = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
-     body: SafeArea(
+     appBar: AppBar(
+        title: Text(salon.name),
+        centerTitle: true,
+      ),
+     body: circular
+      ? Center(child: CircularProgressIndicator())
+      :SafeArea(
        child:SingleChildScrollView(
          child: Column(
            children: [
-             AppBarr(),
-             SizedBox(height: 20),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Text("Our Team :",
-                     style: TextStyle(color: Colors.purple.shade900,fontSize: 30,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 8,),
-             Bodyy(),
-             SizedBox(height: 24,),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Text(
-                     "Service we provide:",
-                     style: TextStyle(color: Colors.purple.shade900,fontSize: 30,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 8,),
-             Bodyy2(),
-             SizedBox(height: 24,),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Text(
-                     "About Salon:",
-                     style: TextStyle(color: Colors.purple.shade900,fontSize:30,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 8,),
-             Align(
-           alignment: Alignment.centerLeft,
-           child: Padding(
-             padding: const EdgeInsets.only(left: 8.0),
-             child: Row(
+             Padding(
+               padding:
+               EdgeInsets.all(0),
+               child:
+               Image.asset( salon.picture,
+                 height: 200,width: 480,fit: BoxFit.cover,),
+             ),
+             SizedBox(height: 30),
+             Row(
                children: [
-                 Icon(Icons.description,size: 30,color: Colors.purple.shade900,),
-                 Text(
-                   " Description:",
-                   style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
+                 Padding(
+                   padding:
+                   EdgeInsets.only(left: 16,right: 12),
+                   child:
+                   Image.asset( salon.picture,
+                       height: 180,width: 130,fit: BoxFit.fill),
+                 ),
+                 Column(
+                   children: [
+                     Align(
+                         alignment: Alignment.topLeft,
+                         child: Padding(
+                           padding: const EdgeInsets.only(left: 0.0),
+                           child: Text(
+                             salon.name,
+                             style: TextStyle(color: Colors.purple.shade900,fontSize: 24,),textAlign: TextAlign.left,),
+                         )),
+
+                     SizedBox(height: 10),
+                     SizedBox(height: 50,
+                       // child:
+                       // bulidRating(),
+                       // RatingBar.builder(
+                       //   initialRating: 3.5,
+                       //   minRating: 1,
+                       //   direction: Axis.horizontal,
+                       //   allowHalfRating: true,
+                       //   itemCount: 4,
+                       //   updateOnDrag: true,
+                       //   itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                       //   itemBuilder: (context, _) => Icon(
+                       //     Icons.star,
+                       //     color: Colors.amber,
+                       //   ),
+                       //   onRatingUpdate: (rating) {
+                       //     print(rating);
+                       //      setState(() {
+                       //        this.rating = rating;
+                       //      });
+                       //   },
+                       // ),
+                     ),
+
+
+                     ElevatedButton(
+                       onPressed: (){
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen()));
+                       },
+                       child: Text("Book Now",
+                         style: TextStyle(
+                         fontSize: getProportionateScreenWidth(15),
+                         color: Colors.white,
+                       ),
+                       ),
+                       style: ElevatedButton.styleFrom(
+                         primary: Colors.purple.shade500,
+                         padding: EdgeInsets.symmetric(horizontal: 50),
+                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                       ),
+                     ),
+                   ],
+                 ),
                ],
              ),
-
-           )),
-       //      SizedBox(height: 4,),
-             Align(
-           alignment: Alignment.centerLeft,
-           child: Padding(
-             padding: const EdgeInsets.only(left: 45.0),
-             child: Text(
-               "description",
-               style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-           )),
-            SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.phone,size: 30,color: Colors.purple.shade900,),
-                       Text(
-                         " Phone Number:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-                     "0598989898",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.location_city,size: 30,color: Colors.purple.shade900,),
-                       Text(
-                         " City:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-                     "Nablus",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.find_replace,size: 30,color: Colors.purple.shade900,),
-                       Text(
-                         " Address:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-                     "Nablus-Palestine",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-                 )),
-             SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.facebook,size: 30,color: Colors.purple.shade900,),
-                       Text(
-
-                         " Facebook Link:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-
-                     "www.facebok...",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-
-                 )),
-             SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.snapchat_outlined,size: 30,color: Colors.purple.shade900,),
-                       Text(
-
-                         " Snapchat Link:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-
-                     "www.snapchat...",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-
-                 )),
-             SizedBox(height: 20,),
-
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 8.0),
-                   child: Row(
-                     children: [
-                       Icon(Icons.location_on,size: 30,color: Colors.purple.shade900,),
-                       Text(
-
-                         " Google Map Link:",
-                         style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,),
-                     ],
-                   ),
-
-                 )),
-             Align(
-                 alignment: Alignment.centerLeft,
-                 child: Padding(
-                   padding: const EdgeInsets.only(left: 45.0),
-                   child: Text(
-
-                     "www.google...",
-                     style: TextStyle(fontSize: 22,),textAlign: TextAlign.left,),
-
-                 )),
-             SizedBox(height: 30,),
-
-          Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Align( alignment: Alignment.centerLeft,
-                child: Text("Write your feedback !"
-                  ,style: TextStyle(color: Colors.purple.shade900,fontSize: 30,),)),
-          ),
-            // SizedBox(height: 13,),
-          Padding(
-              padding: EdgeInsets.all(8.0),
-            child: TextField(
-              maxLines: 4,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.all(10),
-               hintText: "Enter your text here ",
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 3, color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ),
-
-
-            ),
-          ),
-
-
-             SizedBox(height: 10,),
-
-             ElevatedButton(
-               onPressed: (){
-                 Navigator.push(context, MaterialPageRoute(builder: (context) => Feedbackk()));
-               },
-               child: Text("See others feedback >", style: TextStyle(
-                 fontSize: 20,
-                 letterSpacing: 2,
-                 color: Colors.white,
-               ),),
-               style: ElevatedButton.styleFrom(
-                 primary: Colors.purple.shade900,
-                 padding: EdgeInsets.symmetric(horizontal: 50),
-                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-               ),
+             SizedBox(height: 15),
+             Divider(
+               color: Colors.black54,
+               indent: 0,
+               endIndent: 0
              ),
-             SizedBox(height: 40,),
+             SizedBox(height: 10),
+             Column(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               Padding(
+                 padding: const EdgeInsets.only(left: 20),
 
+                 child: Row(
+                   children: [
+                     Icon(Icons.place,size: 26,color: Colors.purple.shade500,),
+                     SizedBox(width: 10),
+                     Column(
+                       children: [
+                         Text(
+                             salon.city,
+                             style:TextStyle(
+                                 color: Colors.black.withOpacity(0.6),
+                                 fontSize: 17,
+                                 fontWeight: FontWeight.bold),
+                             textAlign: TextAlign.left),
+                         SizedBox(height: 3),
 
-          //   value: SystemUiOverlayStyle.light,
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                                 salon.address,
+                                 style:TextStyle(color: Colors.black87,
+                                     fontSize: 15,
+                                     fontWeight: FontWeight.bold),
+                                 textAlign: TextAlign.left)
+                         ),
+                       ],
+                     ),
+                   ],
+                 ),
+               ),
+               SizedBox(height: 25),
+               Padding(
+                 padding: const EdgeInsets.only(left: 20),
+
+                 child: Row(
+                   children: [
+                     Icon(Icons.access_time_sharp,size: 26,color: Colors.purple.shade500),
+                     SizedBox(width: 10),
+                     Column(
+                       children: [
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                               "Opening Hours",
+                               style:TextStyle(
+                                   color: Colors.black.withOpacity(0.6),
+                                 fontSize: 17,
+                                 fontWeight: FontWeight.bold),
+                               textAlign: TextAlign.left)
+                         ),
+
+                         SizedBox(height: 4),
+
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                               "${salon.openTime} AM - ${salon.closeTime} PM",
+                               style:TextStyle(
+                                 color: Colors.black87,
+                                 fontSize: 13,
+                                   fontWeight: FontWeight.bold),
+                               textAlign: TextAlign.left)
+                         ),
+                       ],
+                     ),
+                     SizedBox(width: 30),
+                     Icon(Icons.today_sharp,size: 26,color: Colors.purple.shade500),
+                     SizedBox(width: 10),
+                     Column(
+                       children: [
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                               "Excluded days",
+                               style:TextStyle(color: Colors.black.withOpacity(0.6),fontSize: 17,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,)),
+
+                         SizedBox(height: 4),
+
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                                 salon.holiday,
+                               style:TextStyle(
+                                 color: Colors.black87,
+                                 fontSize: 15,
+                                 fontWeight: FontWeight.bold),
+                               textAlign: TextAlign.left)
+                         ),
+                       ],
+                     ),
+                   ],
+                 ),
+               ),
+               SizedBox(height: 25),
+               Padding(
+                 padding: const EdgeInsets.only(left: 20),
+
+                 child: Row(
+                   children: [
+                     Icon(Icons.phone,size: 26,color: Colors.purple.shade500,),
+                     SizedBox(width: 10),
+                     Column(
+                       children: [
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                                 "Phone",
+                                 style:TextStyle(color: Colors.black.withOpacity(0.6),
+                                     fontSize: 17,
+                                     fontWeight: FontWeight.bold),
+                                 textAlign: TextAlign.left)
+                         ),
+                         SizedBox(height: 4),
+
+                         Align(
+                             alignment: Alignment.centerLeft,
+                             child: Text(
+                                 salon.phone,
+                                 style:TextStyle(color: Colors.black87,
+                                   fontSize: 15,
+                                   fontWeight: FontWeight.bold,),
+                                 textAlign: TextAlign.left)
+                         ),
+                       ],
+                     ),
+                     SizedBox(width: getProportionateScreenWidth(55)),
+                     ElevatedButton(
+                       onPressed: (){
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                       },
+                       child: Text("Call Now",
+                         style: TextStyle(
+                           fontSize: getProportionateScreenWidth(13),
+                           color: Colors.white,
+                         ),
+                       ),
+                       style: ElevatedButton.styleFrom(
+                         primary: Colors.purple.shade500,
+                         padding: EdgeInsets.symmetric(horizontal: 20),
+                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+               SizedBox(height: 20),
+               Padding(
+                 padding: const EdgeInsets.only(left: 20),
+
+                 child: Row(
+                   children: [
+                     Icon(Icons.location_on_outlined,size: 26,color: Colors.purple.shade500,),
+                     SizedBox(width: 10),
+                    ElevatedButton(
+                     onPressed: (){
+                       Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                     },
+                     child: Text("View location in google maps",
+                     style: TextStyle(
+                       fontSize: getProportionateScreenWidth(12),
+                       color: Colors.white,
+                     ),
+                   ),
+                 style: ElevatedButton.styleFrom(
+                   primary: Colors.purple.shade500,
+                   padding: EdgeInsets.symmetric(horizontal: 20),
+                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                 ),
+               ),
+                  ]
+               ),
+               ),
+               SizedBox(height: 20),
+             ],
+           ),
+             Divider(
+               color: Colors.black54,
+               indent: 0,
+               endIndent: 0,
+             ),
+             SizedBox( height: 10),
+
+             empEmpty ? SizedBox(height: getProportionateScreenWidth(1))
+             :Column(
+               children: [
+                 Align(
+                     alignment: Alignment.centerLeft,
+                     child: Padding(
+                       padding: const EdgeInsets.only(left: 15),
+                       child: Text(
+                         "Our Team :",
+                         style: TextStyle(color: Colors.purple.shade900,
+                           fontSize: 24,
+                           fontWeight: FontWeight.bold,),
+                         textAlign: TextAlign.left),
+                     )
+                 ),
+                 SizedBox(height: 8),
+                 Container(
+                   height: 130,
+                   child: ListView.separated(
+                     padding: EdgeInsets.all(6),
+                     scrollDirection: Axis.horizontal,
+                     itemCount: employees.length,
+                     separatorBuilder: (context, _) => SizedBox(width: 18),
+                     itemBuilder: (context,index) => buildCard(employees: employees[index]),
+
+                   ),
+                 ),
+                 SizedBox(height: 6),
+                 Divider(
+                   color: Colors.black54,
+                   indent: 0,
+                   endIndent: 0,
+                 ),
+                 SizedBox(height: 14),
+               ],
+             ),
+             serviceempty ? SizedBox(height: getProportionateScreenWidth(1))
+             :Column(
+               children: [
+                 Align(
+                     alignment: Alignment.centerLeft,
+                     child: Padding(
+                       padding: const EdgeInsets.only(left: 15.0),
+                       child: Text(
+                         "Service we provide:",
+                         style: TextStyle(color: Colors.purple.shade900,
+                           fontSize: 24,
+                           fontWeight: FontWeight.bold),
+                         textAlign: TextAlign.left),
+                     )
+                 ),
+                 SizedBox(height: 8),
+                 Container(
+                   margin:  const EdgeInsets.all(0),
+                   height: 300,
+                   width: double.infinity,
+                   child: Column(
+                     children: [
+                       SizedBox(
+                         height: 60,
+                         width: double.infinity,
+                         child: ListView.builder(
+                             itemCount: cate.length,
+                             physics: const BouncingScrollPhysics(),
+                             scrollDirection: Axis.horizontal,
+                             itemBuilder: (ctx,index){
+                               return Column(
+                                 children: [
+                                   GestureDetector(
+                                     onTap: () {
+                                       setState(() {
+                                         current= index;
+                                         currentCategory = cate[index].category;
+                                         fun();
+                                       });
+                                     },
+                                     child: AnimatedContainer(
+                                       duration: const Duration(milliseconds: 300),
+                                       margin: EdgeInsets.all(4),
+                                       width: 100,
+                                       height: 45,
+                                       decoration: BoxDecoration(
+                                         borderRadius : BorderRadius.circular(8),
+                                           color: current == index
+                                           ? Colors.purple.withOpacity(0.3)
+                                          : Colors.grey.withOpacity(0.2),
+                                         border: current == index
+                                           ?Border.all(
+                                           color: Colors.purple,width: 2)
+                                             : null
+                                       ),
+                                       child: Center(
+                                         child: Text(
+                                           cate[index].category,
+                                           style: TextStyle(fontWeight: FontWeight.w600,
+                                           color: current== index
+                                               ? Colors.black
+                                               : null,
+                                           ),
+                                         ),
+                                       ),
+                                     ),
+                                   ),
+                                   Visibility(
+                                     visible: current== index,
+                                     child: Container(
+                                       width: 5,
+                                       height: 5,
+                                       decoration: const BoxDecoration(
+                                         shape: BoxShape.circle,
+                                         color: Colors.deepPurpleAccent
+                                       ),
+                                     ),
+                                   ),
+                                 ],
+                               );
+                             }
+                         ),
+                       ),
+
+                       Expanded(
+                         child: Container(
+                           margin: const EdgeInsets.only(top: 8),
+                           width: double.infinity,
+                           child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                             Expanded(
+                               child: Container(
+                                 child: ListView.separated(
+                                   padding: EdgeInsets.only(left: 10, right: 10),
+                                   scrollDirection: Axis.vertical,
+                                   itemCount: serviceeCategory.length, // here**** current
+                                   separatorBuilder: (context, _) => SizedBox(height: 8),
+                                   itemBuilder: (context,index) => buildCardS(servicee: serviceeCategory[index]), // here****
+                               ),
+                               ),
+                            ),
+                            ],
+                           ),
+                         ),
+                       ),
+                     ],
+                   ),
+                 ),
+                 SizedBox(height: 9),
+                 Divider(
+                   color: Colors.black54,
+                   indent: 0,
+                   endIndent: 0,
+                 ),
+               ],
+             ),
+             SizedBox(height: 24),
+
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 10.0),
+          //   child: Align( alignment: Alignment.centerLeft,
+          //       child: Text("Write your feedback !"
+          //         ,style: TextStyle(color: Colors.purple.shade900,fontSize: 30,),)),
+          // ),
+          //   // SizedBox(height: 13,),
+          // Padding(
+          //     padding: EdgeInsets.all(8.0),
+          //   child: TextField(
+          //     maxLines: 4,
+          //     decoration: InputDecoration(
+          //       contentPadding: EdgeInsets.all(10),
+          //      hintText: "Enter your text here ",
+          //       enabledBorder: OutlineInputBorder(
+          //         borderSide: BorderSide(width: 3, color: Colors.grey.shade300),
+          //         borderRadius: BorderRadius.circular(20.0),
+          //       ),
+          //     ),
+          //
+          //
+          //   ),
+          // ),
+          //
+          //
+          //    SizedBox(height: 6,),
+          //
+          //    ElevatedButton(
+          //      onPressed: (){
+          //
+          //      },
+          //      child: Text("Send", style: TextStyle(
+          //        fontSize: 20,
+          //        letterSpacing: 3,
+          //        color: Colors.white,
+          //      ),),
+          //      style: ElevatedButton.styleFrom(
+          //        primary: Colors.purple.shade900,
+          //        padding: EdgeInsets.symmetric(horizontal: 50),
+          //        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          //      ),
+          //    ),
+          //    ElevatedButton(
+          //      onPressed: (){
+          //        Navigator.push(context, MaterialPageRoute(builder: (context) => Feedbackk()));
+          //      },
+          //      child: Text("See others feedback >", style: TextStyle(
+          //        fontSize: 20,
+          //        letterSpacing: 2,
+          //        color: Colors.white,
+          //      ),),
+          //      style: ElevatedButton.styleFrom(
+          //        primary: Colors.purple.withOpacity(0.1),
+          //        padding: EdgeInsets.symmetric(horizontal: 50),
+          //        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          //      ),
+          //    ),
+             SizedBox(height: 40),
            ],
          ),
        ),
      ),
-
-
-
-
     );
+
+    // Widget bulidRating() => RatingBar.builder(
+    //   minRating: 1,
+    //   direction: Axis.horizontal,
+    //   allowHalfRating: true,
+    //   itemCount: 4,
+    //   updateOnDrag: true,
+    //   itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+    //   itemBuilder: (context, _) => Icon(
+    //     Icons.star,
+    //     color: Colors.amber,
+    //   ),
+    //   onRatingUpdate: (rating) {
+    //     print(rating);
+    //     setState(() {
+    //       this.rating = rating;
+    //     });
+    //   },
+    // );
+
+    // void showRating() => showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: Text('Rate this Salon'),
+    //     content: Column(
+    //       crossAxisAlignment: CrossAxisAlignment.center,
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [
+    //         Text('please leave a star rating.',
+    //             style: TextStyle(fontSize: 20)
+    //         ),
+    //         const SizedBox(height: 32)
+    //       ],
+    //     ),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () {
+    //           Navigator.of(context).pop();
+    //         },
+    //         child: Text('OK',
+    //             style: TextStyle(fontSize: 20)
+    //         ),
+    //         bulidRating(),
+    //       )
+    //     ],
+    //   ),
+    // );
+
 
   }
 
   double getProportionateScreenWidth(double inputWidth) {
     double screenWidth = 500;
-
     // 375 is the layout width that designer use
     return (inputWidth / 375.0) * screenWidth;
   }
+
+
 }
 
-class AppBarr extends StatelessWidget{
-   const AppBarr({Key? key}) : super(key:key);
-  @override
-  Widget build(BuildContext context) {
-
-    return Container(
-      padding: EdgeInsets.only(top: 15, left: 16,right: 20),
-      height: 200,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-        gradient: LinearGradient(
-          colors: [
-            Color(0xffb116dc),
-            Color(0xff8778ce),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: (){
-                  Navigator.pop(context);
-                },
-                borderRadius: BorderRadius.circular(50),
-                child: Stack(
-                  children: [
-                    Container(
-                      //   padding: EdgeInsets.all(getProportionateScreenWidth(1)),
-                      height: 36,
-                      width:36,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        // shape: BoxShape.circle,
-                      ),
-                      child:   Align(
-                          alignment: Alignment.topLeft,
-                          child:
-                          Icon(Icons.arrow_back_outlined,size: 36,color: Colors.white,)),
-
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-
-
-          Align(
-              alignment: Alignment.centerLeft,
-              child: Text("\nWelcome to our salon",style:TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20,) ,)),
-
-          const SizedBox(height: 20,),
-          TextFormField(
-            decoration: InputDecoration(
-              prefixIcon: Icon(
-                Icons.search,
-                color: Colors.grey,
-                size: 26,
-              ),
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-              labelText: "Search ",
-              labelStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-              isDense: true,
-            ),
-          ),
-        ],
-      ),
-
-
-    );
-  }
-
-}
 
 
 class Employee{
-  final String urlImage;
+  final String picture;
   final String name;
   final String job;
   
   const Employee({
-  required this.urlImage, 
+  required this.picture,
   required this.name,
     required this.job,
   });
+  static Employee fromJson(json) => Employee(
+    name: json['name'],
+    picture: json['picture'],
+    job: json['job'],
+  );
 }
 
-class Service {
-  final String urlImage;
+class Servicee {
   final String name;
-  final String description;
+  final String price;
+  final String category;
 
-  Service({
-    required this.urlImage,
+  Servicee({
     required this.name,
-    required this.description,
+    required this.price,
+    required this.category,
   });
-
+  static Servicee fromJson(json) => Servicee(
+    name: json['name'],
+    price: json['price'].toString(),
+    category: json['category'],
+  );
 }
 
-class Bodyy extends StatelessWidget {
-  List<Employee> employees = [
-    Employee(
-      urlImage:
-      'assets/images/emp.png',
-      name: 'Mary Ali',
-      job: 'Salon Admin',
-    ),
-
-    Employee(
-      urlImage:
-      'assets/images/emp3.png',
-      name: 'Yara Ahmad',
-      job: 'Hair stylish',
-    ),
-
-    Employee(
-      urlImage:
-      'assets/images/emp.png',
-      name: 'Aya Abu Ali',
-      job: 'Hair stylish',
-    ),
-
-    Employee(
-      urlImage:
-      'assets/images/emp3.png',
-      name: 'Aya Abu Ali',
-      job: 'Hair stylish',
-    ),
-
-    Employee(
-      urlImage:
-      'assets/images/emp.png',
-      name: 'Aya Abu Ali',
-      job: 'Hair stylish',
-    ),
-
-  ];
-   Bodyy({Key? key}) : super(key: key);
-
-  
-
-  @override
-  
-  Widget build(BuildContext context) {
-   return
-   Container(
-     height: 130,
-     child: ListView.separated(
-       padding: EdgeInsets.all(6),
-        scrollDirection: Axis.horizontal,
-         itemCount: employees.length,
-       separatorBuilder: (context, _) => SizedBox(width: 18),
-       itemBuilder: (context,index) => buildCard(employees: employees[index]),
-
-     ),
-   );
-  }
 
   Widget buildCard({
   required Employee employees,
-  }) => Container(
+}) => Container(
     width: 113,
     child: Column(
       children: [
         Expanded(
-          child: AspectRatio(
+          child:  AspectRatio(
             aspectRatio: 4/3,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(60),
               child: Image.asset(
-                employees.urlImage,
+                employees.picture,
                 fit: BoxFit.cover,
               ),
             ),
           ),),
 
-        const SizedBox(height: 4,),
+        const SizedBox(height: 4),
         Text(
           employees.name,
           style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
@@ -491,115 +763,81 @@ class Bodyy extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           employees.job,
-          style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold,),
         ),
       ],
     ),
   );
-}
-
-class Bodyy2 extends StatelessWidget {
-  List<Service> services = [
-    Service(
-      urlImage:
-      'assets/images/hair.png',
-      name: 'Hair Cut',
-      description: 'All hair cuts available',
-    ),
-
-    Service(
-      urlImage:
-      'assets/images/makeu.png',
-      name: 'Make up',
-      description: 'Different looks',
-    ),
-
-    Service(
-      urlImage:
-      'assets/images/makeu.png',
-      name: 'Make up',
-      description: 'Different looks',
-    ),
-
-    Service(
-      urlImage:
-      'assets/images/makeu.png',
-      name: 'Make up',
-      description: 'Different looks',
-    ),
 
 
-
-
-
-
-  ];
-  Bodyy2({Key? key}) : super(key: key);
-
-  @override
-
-  Widget build(BuildContext context) {
- //   final Service s ;
-    return
-      Container(
-        height: 230,
-        child: ListView.separated(
-          padding: EdgeInsets.all(6),
-          scrollDirection: Axis.horizontal,
-          itemCount: services.length,
-          separatorBuilder: (context, _) => SizedBox(width: 35,),
-          itemBuilder: (context,index) => buildCard(context, services: services[index]),
-
-        ),
-      );
-  }
-
-  Widget buildCard(
-      BuildContext context,{
-    required Service services,
+  Widget buildCardS({
+    required Servicee servicee,
   }) => Container(
-    width: 180,
+    width: double.infinity,
+    color: Colors.grey.withOpacity(0.1),
+    height: 37,
 
-    child: Column(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child:  AspectRatio(
-            aspectRatio: 4/3,
-            child:  GestureDetector(
-             onTap: (){
-             print("Container clicked");
-             Navigator.push(context, MaterialPageRoute(builder: (context) => ServicePage(services: services)));
-               },
-            child: Container(
-
-              //padding: EdgeInsets.all(getProportionateScreenWidth(5)),
-            decoration: BoxDecoration(
-             color: Colors.grey.withOpacity(0.1),
-             borderRadius: BorderRadius.circular(15),
-             ),
-            child: Image.asset(services.urlImage,fit: BoxFit.cover,),
-             ),
-               ),
-
+        Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Text(
+            servicee.name,
+            style: TextStyle(fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87.withOpacity(0.7)),
           ),
         ),
 
-        const SizedBox(height: 4,),
-        Text(
-          services.name,
-          style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold,),
+        Padding(
+          padding: const EdgeInsets.only(right: 30.0),
+          child: Text("₪"
+            +servicee.price,
+            style: TextStyle(fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurpleAccent),
+          ),
         ),
-        const SizedBox(height: 4,),
-        Text(
-          services.description,
-          style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold,),
-        ),
-
       ],
-
     ),
   );
 
+
+class ItemListt extends StatelessWidget{
+  final List<Serv> c;
+ const ItemListt(Key key ,  this.c) :super(key: key);
+  @override
+  Widget build(BuildContext context){
+    return Column(
+      children: c.map((e) => ItemCard(serv: e,)).toList(),
+    );
+  }
+}
+
+class ItemCard extends StatelessWidget {
+  final Serv serv;
+
+  const ItemCard( {Key? key,  required this.serv}) : super(key : key);
+  @override
+  Widget build(BuildContext context) {
+   return Card(
+       elevation: 2.0,
+       margin: const EdgeInsets.symmetric(
+       horizontal: 20.0,
+       vertical: 10.0,
+   ),
+     child: Row(
+     children: [
+        Container (
+         width: 100,
+          child: Text("hi"),
+        ) ,
+    ],
+
+     ),
+   );
+  }
 }
 
 
@@ -607,17 +845,13 @@ class  Info {
   final String name;
   final String value;
 
-
-
   const Info( {
     required this.name,
     required this.value,
-
   }  );
 
   static Info fromJson(json) => Info(
     name: json['name'],
     value: json['value'],
-
   );
 }

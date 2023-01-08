@@ -9,6 +9,8 @@ import '../salon_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
 
+import 'SelectServices.dart';
+
 class makeOffer extends StatefulWidget {
   const makeOffer({Key? key}) : super(key: key);
   @override
@@ -147,8 +149,11 @@ class _makeOfferState extends State<makeOffer> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
                       ),
                       onPressed: () {
-                        // Navigator.pushNamed(context, SignInScreen.routeName);
-                      },
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const services()
+                        )
+                        );
+                            },
                       child: Text('Choose services',
                         style: TextStyle(
                           fontSize: getProportionateScreenWidth(18),
@@ -246,7 +251,7 @@ class _makeOfferState extends State<makeOffer> {
                         )),
                     SizedBox(height: SizeConfig.screenHeight * 0.04),
                     DefaultButton(
-                      text: "Make Offer",
+                      text: "Make the Offer",
                       press: () {
                         if (_formKey.currentState!.validate()) {
                           makeOffer();

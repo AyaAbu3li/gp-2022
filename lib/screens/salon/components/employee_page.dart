@@ -31,7 +31,7 @@ class _employeepageState extends State<employeepage> {
     fetchData();
   }
   void fetchData() async {
-    var res = await http.get(Uri.parse("http://"+ip+":3000/employee/"+widget.text),
+    var res = await http.get(Uri.parse("http://"+ip+":3000/employe/"+widget.text),
       headers: <String, String>{
       'Context-Type': 'application/json;charSet=UTF-8',
       });

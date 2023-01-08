@@ -7,6 +7,7 @@ import 'offers.dart';
 import 'make_offer.dart';
 import 'alerts.dart';
 import 'Help.dart';
+import 'services.dart';
 
 class Body extends StatefulWidget {
   const Body({Key? key}) : super(key: key);
@@ -241,10 +242,10 @@ class _BodyState extends State<Body> {
                     Expanded(
                       child: InkWell(
                         onTap:() {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (context) => const offers(),
-                          // )
-                          // );
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const services(),
+                          )
+                          );
                         },
                         child: Container(
                           child: Column(

@@ -14,8 +14,10 @@ State<offers> createState() => _offersState();
 }
 class _offersState extends State<offers> {
   List<Offer> offer = [];
+  List<Offer> offerReq = [];
   bool circular = true;
   bool empty = true;
+  bool emptyReq = true;
 
   @override
   void initState() {
@@ -34,9 +36,16 @@ class _offersState extends State<offers> {
       data = json.decode(res.body);
       setState(() {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
+        this.offerReq = data.map<Offer>(Offer.fromJson).toList();
+
         offer.removeWhere((data) => data.role == 0);
+        offerReq.removeWhere((data) => data.role == 1);
+
         if(offer.isNotEmpty){
            empty = false;
+        }
+        if(offerReq.isNotEmpty){
+          emptyReq = false;
         }
         circular = false;
       });
@@ -46,17 +55,24 @@ class _offersState extends State<offers> {
     }
   }
 @override
-Widget build(BuildContext context) {
-  return Scaffold(
+Widget build(BuildContext context) => DefaultTabController(
+    length: 2,
+    child: Scaffold(
     backgroundColor: Colors.white,
     extendBodyBehindAppBar: true,
     appBar: AppBar(
       title: const Text('Our Offers'),
-      centerTitle: true
+      centerTitle: true,
+      bottom: TabBar(
+        tabs: [
+          Tab(text: 'Offers'),
+          Tab(text: 'Requested Offers')
+        ],
+      ),
     ),
-    body: circular
-        ? Center(child: CircularProgressIndicator())
-        : empty
+    body: TabBarView(
+        children: [
+         empty
         ? Center(child: Text("No offers",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
       : Column(
       children: [
@@ -70,7 +86,26 @@ Widget build(BuildContext context) {
         ),
       ],
     ),
-  );
+
+        emptyReq
+            ? Center(child: Text("No offers",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
+            : Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Container(
+                    child: buildOffers(offerReq),
+                  ),
+                ),
+              ),
+            ],
+        ),
+
+        ],
+    ),
+  ),
+);
 }
 
 Widget buildOffers(List<Offer> offerrss) => ListView.builder(
@@ -103,7 +138,8 @@ Widget buildOffers(List<Offer> offerrss) => ListView.builder(
     );
   },
 );
-}
+
+
 class Offer {
   final String name;
   final int role;

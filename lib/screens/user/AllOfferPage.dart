@@ -14,6 +14,7 @@ class AllOferPage extends StatefulWidget {
 class _AllOferPageState extends State<AllOferPage> {
   List<Offer> offer = [];
   bool circular = true;
+  bool offerempty = false;
 
   @override
   void initState() {
@@ -32,29 +33,12 @@ class _AllOferPageState extends State<AllOferPage> {
       setState(() {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 0);
+        print(offer);
         if(offer.isEmpty){
-          showDialog(
-            context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text('come back later'),
-                  content: Text("There are no offers at the moment"),
-                  actions: [
-                    TextButton(
-                      child: Text('OK',
-                          style: TextStyle(
-                            fontSize: getProportionateScreenWidth(14),
-                            color: Colors.white,)),
-                      style: TextButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),
-                      onPressed: () =>  Navigator.push(
-                          context, MaterialPageRoute(builder: (context) => HomeScreen())),
-                    ),
-                  ],
-                ),
-          );
+          offerempty = true;
+
+           // "There are no offers at the moment"
+
         }
         circular = false;
       });
@@ -69,18 +53,20 @@ class _AllOferPageState extends State<AllOferPage> {
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.purple.shade300,
-        elevation: 0,
-        title: const Text(
-          'Special Offers',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Special Offers'),
         centerTitle: true,
       ),
       body: circular
           ? Center(child: CircularProgressIndicator())
-          :   Column(
-        children: [
+          :  offerempty
+          ? Center(child:
+            Text("No offers right now",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey)))
+          :Column(
+            children: [
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(15),

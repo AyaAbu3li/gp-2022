@@ -7,6 +7,8 @@ class Salon {
   String phone;
   String id, openTime, closeTime;
   String address, city, googlemaps, picture;
+  String holiday;
+
   Salon(
     this.email,
     this.password,
@@ -19,6 +21,7 @@ class Salon {
     this.picture,
     this.openTime,
     this.closeTime,
+      this.holiday,
   );
 
 }

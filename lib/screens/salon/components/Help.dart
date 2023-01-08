@@ -71,7 +71,6 @@ class _HelpState extends State<Help> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Contact us"),
-        backgroundColor: Colors.purple.shade300,
         centerTitle: true,
       ),
       body:

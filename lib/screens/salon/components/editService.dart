@@ -10,13 +10,14 @@ import '../salon_screen.dart';
 import 'employee_page.dart';
 
 
-class employee extends StatefulWidget {
-  const employee({Key? key}) : super(key: key);
+class editService extends StatefulWidget {
+  final String text;
+  const editService(this.text);
   @override
-  State<employee> createState() => _employeeState();
+  State<editService> createState() => _editServiceState();
 }
 
-class _employeeState extends State<employee> {
+class _editServiceState extends State<editService> {
   final _formKey = GlobalKey<FormState>();
   List<Employee> employees = [];
 
@@ -32,18 +33,11 @@ class _employeeState extends State<employee> {
   }
   void getEmployees() async {
     var data;
-
-    var res2 = await http.get(Uri.parse("http://"+ip+":3000/users/me"),
+    try{
+      var res = await http.get(Uri.parse("http://"+ip+":3000/employee"),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8',
           'Authorization': global.token
-        });
-    var decoded = json.decode(res2.body);
-    String name = decoded['name'];
-    try{
-      var res = await http.get(Uri.parse("http://"+ip+":3000/employee/"+name),
-        headers: <String, String>{
-          'Context-Type': 'application/json;charSet=UTF-8',
         },
       );
       data = json.decode(res.body);
@@ -52,7 +46,7 @@ class _employeeState extends State<employee> {
         circular = false;
       });
     } catch(e){
-      print(" employee");
+      print(" hiiii");
       print(e);
     }
   }
@@ -69,28 +63,28 @@ class _employeeState extends State<employee> {
             'job': em.job
           });
 
-      showDialog(
-        context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text('Done'),
-              content: Text("New employee has been Added succecfully"),
-              actions: [
-                TextButton(
-                  child: Text('OK',
-                      style: TextStyle(
-                        fontSize: getProportionateScreenWidth(14),
-                        color: Colors.white,)
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder:(context) => employee()) ),
-                ),
-              ],
-            ),
-      );
+      // showDialog(
+      //   context: context,
+      //   builder: (context) =>
+      //       AlertDialog(
+      //         title: Text('Done'),
+      //         content: Text("New employee has been Added succecfully"),
+      //         actions: [
+      //           TextButton(
+      //             child: Text('OK',
+      //                 style: TextStyle(
+      //                   fontSize: getProportionateScreenWidth(14),
+      //                   color: Colors.white,)
+      //             ),
+      //             style: TextButton.styleFrom(
+      //               backgroundColor: kPrimaryColor,
+      //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      //             ),
+      //             onPressed: () => Navigator.push(context, MaterialPageRoute(builder:(context) => employee()) ),
+      //           ),
+      //         ],
+      //       ),
+      // );
 
     } catch(e){
       print("add employee");

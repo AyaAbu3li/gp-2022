@@ -88,7 +88,10 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
             'address': salon.address,
             'city': valueChoose,
             'googlemaps': salon.googlemaps,
-            'picture': salon.picture
+            'picture': salon.picture,
+            'holiday': valueChoose2,
+            'openTime': salon.openTime,
+            'closeTime': salon.closeTime,
           });
       if(res.statusCode == 400){
         setState(() {
@@ -131,6 +134,15 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   String phone ='';
   String email="";
   String password="";
+  final listItem2 = [
+    "Monday", "Tuesday" , "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  ];
+  String valueChoose2 = "Monday";
+
+
+  TimeOfDay time = TimeOfDay(hour: 09, minute: 00);
+  TimeOfDay time2 = TimeOfDay(hour: 5, minute: 00);
+
 
   _SignUpSalonFormState(){
     valueChoose= listItem[0];
@@ -148,6 +160,14 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   ];
   @override
   Widget build(BuildContext context) {
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
+
+    final hours2 = time2.hour.toString().padLeft(2, '0');
+    final minutes2 = time2.minute.toString().padLeft(2, '0');
+    salon.closeTime = hours2+':'+minutes2;
+    salon.openTime = hours+':'+minutes;
+
     return Form(
       key: _formKey,
       child: Column(
@@ -230,10 +250,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
                 width: getProportionateScreenWidth(14),
 
               ),
-              SizedBox(
-                width: getProportionateScreenWidth(10),
-
-              ),
+              SizedBox(width: getProportionateScreenWidth(10)),
               Text(namme),
             ],
           ),
@@ -288,6 +305,115 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
             ),
           ),
           SizedBox(height: getProportionateScreenHeight(10)),
+          Row(children: [
+            Text('Opening Hours:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+          ),
+          SizedBox(height: SizeConfig.screenHeight * 0.01),
+
+          Row(
+            children: [
+              Column(
+                children: [
+                  Text(
+                    hours+':'+minutes,
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  ElevatedButton(
+                    style: TextButton.styleFrom(
+                        backgroundColor: kPrimaryColor),
+                    child: Text('Open Time'),
+                    onPressed: () async {
+                      TimeOfDay? newTime = await showTimePicker(
+                        context: context,
+                        initialTime: time,
+                        builder: (context, child) {
+                          return Theme(
+                            data: ThemeData.light().copyWith(
+                              colorScheme: ColorScheme.light(
+                                // change the border color
+                                primary: Colors.purpleAccent,
+                                // change the text color
+                                onSurface: Colors.purple,
+                              ),
+                              // button colors
+                              buttonTheme: ButtonThemeData(
+                                colorScheme: ColorScheme.light(
+                                  primary: Colors.green,
+                                ),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (newTime == null)
+                        return; // if CANCEL then null
+
+                      setState(() =>
+                      {
+                        time = newTime,
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(width: SizeConfig.screenWidth * 0.3),
+              Column(
+                children: [
+                  Text(
+                    hours2+':'+minutes2,
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  ElevatedButton(
+                    style: TextButton.styleFrom(
+                        backgroundColor: kPrimaryColor),
+                    child: Text('Close Time'),
+                    onPressed: () async {
+                      TimeOfDay? newTime = await showTimePicker(
+                        context: context,
+                        initialTime: time2,
+                        builder: (context, child) {
+                          return Theme(
+                            data: ThemeData.light().copyWith(
+                              colorScheme: ColorScheme.light(
+                                // change the border color
+                                primary: Colors.purpleAccent,
+                                // change the text color
+                                onSurface: Colors.purple,
+                              ),
+                              // button colors
+                              buttonTheme: ButtonThemeData(
+                                colorScheme: ColorScheme.light(
+                                  primary: Colors.green,
+                                ),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (newTime == null)
+                        return; // if CANCEL then null
+
+                      setState(() =>
+                      {
+                        time2 = newTime,
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          SizedBox(height: SizeConfig.screenHeight * 0.01),
           TextFormField(
             onChanged: (value) {
               salon.address = value;
@@ -304,7 +430,6 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
               labelStyle: TextStyle(color: Colors.black),
             ),
           ),
-          // Simple description of the salon
           SizedBox(height: getProportionateScreenHeight(20)),
           DropdownButtonFormField(
             isExpanded: true,
@@ -336,27 +461,38 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
                 )
             ).toList(),
           ),
-          // TextFormField(
-          //   onChanged: (value) {
-          //     salon.description = value;
-          //   },
-          //   decoration: const InputDecoration(
-          //     prefixIcon: Icon(
-          //       Icons.drive_file_rename_outline,
-          //       color: Colors.purple ,
-          //     ),
-          //
-          //     border: const OutlineInputBorder(
-          //       borderRadius: BorderRadius.all(Radius.circular(15)),
-          //     ),
-          //     labelText: 'Simple description of the salon',
-          //     labelStyle: TextStyle(color: Colors.black),
-          //   ),
-          //   minLines: 6,
-          //   maxLines: null,
-          // ),
-          // Simple description of the salon
           SizedBox(height: getProportionateScreenHeight(20)),
+          DropdownButtonFormField(
+            isExpanded: true,
+            hint: Text("Excluded day"),
+            icon: const Icon(
+              Icons.arrow_drop_down_circle,
+              color: Colors.purple,
+            ),
+            dropdownColor: Colors.deepPurple.shade50,
+            decoration: InputDecoration(
+              labelText: 'Excluded day',
+              labelStyle: TextStyle(color: Colors.black),
+              prefixIcon: Icon(
+                Icons.today_sharp,
+                color: Colors.purple,
+              ),
+            ),
+            value: valueChoose2,
+            onChanged: (newValue2) {
+              setState(() {
+                valueChoose2 = newValue2 as String;
+              });
+            },
+            items: listItem2.map((valueItem) =>
+                DropdownMenuItem(
+                  value: valueItem,
+                  child: Text(valueItem),
+                )
+            ).toList(),
+          ),
+
+          SizedBox(height: 20.0),
           TextFormField(
               onChanged: (newValue) {
                 salon.googlemaps = newValue;

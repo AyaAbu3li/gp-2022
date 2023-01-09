@@ -1,34 +1,93 @@
+import 'dart:collection';
+import 'dart:convert';
+import '../../../constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../../../Model/category.dart';
+import '../../../Model/salon.dart';
+import '../salon_screen.dart';
+import 'package:purple/global.dart' as global;
 
 class services extends StatefulWidget {
   const services({Key? key}) : super(key: key);
-
   @override
   State<services> createState() => _servicesState();
 }
 
 class _servicesState extends State<services> {
 
-  List<String> sec = [
-    "MAKEUP",
-    "HAIR",
-    "FACE",
-    "LASER",
-    "NAILS",
-    "SCIN CARE",
-    "WEDDING",
-  ];
+  Salon salon = Salon('','','','','','','','','','','','');
+  List<Category> cate = [];
+  List<Servicee> serviceee = [];
+  List<Servicee> serviceee2 = [];
 
-  List<ServiceModel> service = [
-    ServiceModel("service 1 ", false),
-    ServiceModel("service 2 ", false),
-    ServiceModel("service 3 ", false),
-    ServiceModel("service 4 ", false),
+  List<Servicee> serCate = [];
+  Map<String, Servicee> type = new HashMap();
 
-  ];
+  bool circular = true;
+  bool empty = false;
 
-  List<ServiceModel> selectedService = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+  void fetchData() async {
+    var res = await http.get(Uri.parse("http://"+ip+":3000/salon"),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+        'Authorization': global.token
+      },
+    );
+    var decoded = json.decode(res.body);
+
+    setState(() {
+      salon.email = decoded['email'];
+    });
+    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    var cat;
+    cat = json.decode(res3.body);
+
+    setState(() {
+      this.cate = cat.map<Category>(Category.fromJson).toList();
+    });
+    if(cate.isNotEmpty) {
+      for (int x = 0; x < cate.length; x++) {
+        var res4 = await http.get(
+          Uri.parse("http://" + ip + ":3000/services/" + salon.email),
+          headers: <String, String>{
+            'Context-Type': 'application/json;charSet=UTF-8',
+          },
+        );
+        var ser = json.decode(res4.body);
+        setState(() {
+          this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
+          this.serviceee2 = ser.map<Servicee>(Servicee.fromJson).toList();
+        });
+        this.serCate = serviceee2;
+        serCate.removeWhere((data) => data.category != cate[x].category);
+
+        for (int j = 0; j < serCate.length; j++) {
+          _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+        }
+      }
+    } else {
+      setState(() {
+        empty = true;
+      });
+    }
+    circular = false;
+  }
+  Map<Category,List<Servicee>> _map = Map();
+
+  List<Servicee> selectedService = [];
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +96,13 @@ class _servicesState extends State<services> {
         title: Text("Select Services"),
         centerTitle: true,
       ),
-      body: SafeArea(
+      body: circular
+          ? Center(child: CircularProgressIndicator())
+          : empty
+          ? Center(child: Text("You have no Services",
+          style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))
+          :
+      SafeArea(
         child:SingleChildScrollView(
           child: Column(
             children: [
@@ -62,7 +127,6 @@ class _servicesState extends State<services> {
                           focusedBorder: InputBorder.none,
                           hintText:
                           'Srarch Services',
-
                           prefixIcon: Icon(Icons.search),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 12,
@@ -85,20 +149,16 @@ class _servicesState extends State<services> {
                   width: double.infinity,
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
 
                   Expanded(
                     child: Container(
-                      //    height: 300,
-                      //   color: Colors.green,
                       child: ListView.separated(
                         padding: EdgeInsets.only(left: 10,right: 10),
                         scrollDirection: Axis.vertical,
-                        itemCount: sec.length,
+                        itemCount: cate.length,
                         separatorBuilder: (context, _) => SizedBox(height: 14),
-                        itemBuilder: (context,index) => buildCard(sec: sec[index]),
+                        itemBuilder: (context,index) => buildCard(sec: cate[index]),
                       ),
                     ),
                   ),
@@ -132,7 +192,7 @@ class _servicesState extends State<services> {
     );
   }
   Widget buildCard({
-    required String sec,
+    required Category sec,
   }) => Container(
     width: double.infinity,
     color: Colors.white,
@@ -145,7 +205,7 @@ class _servicesState extends State<services> {
           child: Align(
             alignment: Alignment.topLeft,
             child: Text(
-              sec,
+              sec.category,
               style:
               TextStyle(
                 fontSize: 20,
@@ -158,45 +218,69 @@ class _servicesState extends State<services> {
        Expanded(
          child: Container(
           child: ListView.builder(
-          itemCount: service.length,
-          itemBuilder: (BuildContext context , int index){
-          return ServiceItem(service[index].serviceName,
-              service[index].isSelected, index);
-            }),
-           ),
-            ),
+          itemCount: _map[sec]!.length,
+            itemBuilder: (BuildContext context , int index)=>
+                ServiceItem(serv: _map[sec]![index]),
+          ),
+         ),
+       ),
       ],
     ),
   );
 
-  Widget ServiceItem(String name, bool isSelected , int index){
+  Widget ServiceItem({required Servicee serv}){
     return ListTile(
 
-      title: Text(name,style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
-      trailing: isSelected
-          ? Icon(Icons.check_circle,color: Colors.purple)
+      title: Text(
+          serv.name,
+        style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 18)
+      ),
+        trailing: serv.isSelected
+
+    ? Icon(Icons.check_circle,color: Colors.purple)
           : Icon(Icons.check_circle_outline_outlined,color: Colors.grey),
       onTap: (){
        setState(() {
-         service[index].isSelected = !service[index].isSelected;
-         if(service[index].isSelected == true) {
-           selectedService.add(ServiceModel(name, true));
+         serv.isSelected = !serv.isSelected;
+         if(serv.isSelected == true) {
+           selectedService.add(serv);
          }
-         else if (service[index].isSelected == false){
+         else if (serv.isSelected == false){
            selectedService.removeWhere((element) =>
-           element.serviceName == service[index].serviceName);
+           element.id == serv.id);
          }
+         print(selectedService);
         });
       },
     );
   }
 }
 
-class ServiceModel{
-  String serviceName;
-  bool isSelected;
+class Servicee {
+  final String name;
+  final String price;
+  final String category;
+  final String id;
+   bool isSelected;
 
-  ServiceModel(this.serviceName, this.isSelected);
 
+  Servicee({
+    required this.name,
+    required this.price,
+    required this.category,
+    required this.id,
+    required this.isSelected,
+
+  });
+  static Servicee fromJson(json) => Servicee(
+    name: json['name'],
+    price: json['price'].toString(),
+    category: json['category'],
+    id: json['_id'],
+    isSelected: json['isSelected'],
+
+  );
 }
 

@@ -14,38 +14,87 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'services.dart';
 
 
-class editService extends StatefulWidget {
-  final String text;
-  const editService(this.text);
+class addService extends StatefulWidget {
+
+  const addService({Key? key}) : super(key: key);
+
   @override
-  State<editService> createState() => _editServiceState();
+  State<addService> createState() => _addServiceState();
 }
 
-class _editServiceState extends State<editService> {
+class _addServiceState extends State<addService> {
   final _formKey = GlobalKey<FormState>();
-  _editServiceState(){
-    // valueChoose= listItem[0];
+  _addServiceState(){
+
   }
   Salon salon = Salon('','','','','','','','','','','','');
   List<Category> cate = [];
+  List<Category> cate2 = [];
 
   bool circular = true;
   String errorNameImg ="assets/icons/white.svg";
   String namme ='';
-  String valueChoose = "MAKEUP";
+  String valueChoose='MAKEUP';
+
   List<String> listItem = [];
+  List<String> listItem2 = [];
+
   Emp em = Emp('','','');
   @override
   void initState() {
     super.initState();
-    getService();
+    getcategorys();
   }
-  void edit() async {
+  void addService() async {
 
     try{
-      var res = await http.patch(Uri.parse("http://"+ip+":3000/services/"+widget.text),
+      var res1 = await http.get(Uri.parse("http://"+ip+":3000/salon"),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+          'Authorization': global.token
+        },
+      );
+      var decoded = json.decode(res1.body);
+
+      setState(() {
+        salon.email = decoded['email'];
+      });
+
+
+      var res2 = await http.get(Uri.parse("http://"+ip+":3000/category/"+ salon.email),
           headers: <String, String>{
             'Context-Type': 'application/json;charSet=UTF-8',
+          });
+      var decoded2 = json.decode(res2.body);
+
+      setState(() {
+        this.cate2 = decoded2.map<Category>(Category.fromJson).toList();
+      });
+      if(cate2.isNotEmpty) {
+        for (int x = 0; x < cate2.length; x++) {
+          listItem2.add(cate2[x].category);
+        }
+      }
+      if(!listItem2.contains(valueChoose) || cate2.isEmpty){
+        try{
+        var res = await http.post(Uri.parse("http://"+ip+":3000/category"),
+            headers: <String, String>{
+              'Context-Type': 'application/json;charSet=UTF-8',
+              'Authorization': global.token
+            },
+            body: <String, String>{
+              'category': valueChoose,
+            });
+      } catch(e){
+      print("add category");
+      print(e);
+    }
+      }
+
+      var res = await http.post(Uri.parse("http://"+ip+":3000/services"),
+          headers: <String, String>{
+            'Context-Type': 'application/json;charSet=UTF-8',
+            'Authorization': global.token
           },
           body: <String, String>{
             'name': em.name,
@@ -56,8 +105,8 @@ class _editServiceState extends State<editService> {
         context: context,
         builder: (context) =>
             AlertDialog(
-              title: Text('modified'),
-              content: Text("Service has been successfully modified"),
+              title: Text('Added'),
+              content: Text("Service has been successfully added"),
               actions: [
                 TextButton(
                   child: Text('OK',
@@ -69,11 +118,7 @@ class _editServiceState extends State<editService> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   onPressed: () =>
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const services(),
-                      )
-                      )
-                      // Navigator.pop(context),
+                      Navigator.pop(context),
                 ),
               ],
             ),
@@ -83,8 +128,8 @@ class _editServiceState extends State<editService> {
       print(e);
     }
   }
-    void getService() async {
-
+    void getcategorys() async {
+      try{
     var res3 = await http.get(Uri.parse("http://"+ip+":3000/Allcategory"),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
@@ -99,29 +144,17 @@ class _editServiceState extends State<editService> {
     for (int x = 0; x < cate.length; x++) {
       listItem.add(cate[x].category);
     }
-    var data;
-    try{
-      var res = await http.get(Uri.parse("http://"+ip+":3000/service/"+widget.text),
-        headers: <String, String>{
-          'Context-Type': 'application/json;charSet=UTF-8',
-        },
-      );
-      data = json.decode(res.body);
-      setState(() {
-        valueChoose = data['category'];
-        em.price = data['price'].toString();
-        em.name = data['name'];
-        circular = false;
-      });
+    circular = false;
     } catch(e){
-      print(" get service");
+      print("get categorys");
       print(e);
     }
   }
 
+
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text('Edit Service')),
+    appBar: AppBar(title: Text('Add Service')),
     body: circular
         ? Center(child: CircularProgressIndicator())
           :SafeArea(
@@ -136,19 +169,7 @@ class _editServiceState extends State<editService> {
                     child: Column(
                     children: [
                       SizedBox(height: SizeConfig.screenHeight * 0.04),
-                      Row(children: [
-                        Text('Service Name',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                      ),
-                      SizedBox(height: 5.0),
                       TextFormField(
-                        initialValue: em.name,
                         onChanged: (value) {
                           em.name = value;
                         },
@@ -170,22 +191,12 @@ class _editServiceState extends State<editService> {
                           border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                           ),
+                          labelText: 'Service name',
+                          labelStyle: TextStyle(color: Colors.black),
                         ),
                       ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.02),
-                      Row(children: [
-                        Text('Service Price',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                      ),
-                      SizedBox(height: 5.0),
+                      SizedBox(height: SizeConfig.screenHeight * 0.03),
                       TextFormField(
-                        initialValue: em.price,
                         onChanged: (value) {
                           em.price = value;
                         },
@@ -207,6 +218,8 @@ class _editServiceState extends State<editService> {
                           border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                           ),
+                          labelText: 'Service price',
+                          labelStyle: TextStyle(color: Colors.black),
                         ),
                       ),
                       SizedBox(height: SizeConfig.screenHeight * 0.02),
@@ -225,27 +238,27 @@ class _editServiceState extends State<editService> {
                       child: DropdownButton2(
                         isExpanded: true,
                         hint:
-                        // Row(
-                          // children: const [
+                        Row(
+                          children: const [
                             Icon(
                               Icons.list,
                               size: 16,
                               color: Colors.purple,
                             ),
-                            // SizedBox(width: 4),
-                        //     Expanded(
-                        //       child: Text(
-                        //         'Select Category',
-                        //         style: TextStyle(
-                        //           fontSize: 14,
-                        //           fontWeight: FontWeight.bold,
-                        //           color: Colors.yellow,
-                        //         ),
-                        //         overflow: TextOverflow.ellipsis,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Select Category',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.yellow,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                         items: listItem
                             .map((item) => DropdownMenuItem<String>(
                           value: item,
@@ -302,10 +315,10 @@ class _editServiceState extends State<editService> {
 
                       SizedBox(height: SizeConfig.screenHeight * 0.3),
                       DefaultButton(
-                        text: "Edit Service",
+                        text: "Add new Service",
                         press: () {
                           if (_formKey.currentState!.validate()) {
-                            edit();
+                            addService();
                           }
                         },
                       ),
@@ -330,65 +343,6 @@ class _editServiceState extends State<editService> {
     ),
   );
 }
-
-//   Widget buildCard({
-//     required Employee employees,
-//   }) => GestureDetector(
-//     onTap: (){
-//       Navigator.push(context, MaterialPageRoute(builder: (context) => employeepage(employees.id.toString())));
-//     },
-//     child: Container(
-//       width: 113,
-//       child: Column(
-//         children: [
-//           Expanded(
-//             child: AspectRatio(
-//               aspectRatio: 4/3,
-//               child: ClipRRect(
-//                 borderRadius: BorderRadius.circular(60),
-//                 child: Image.asset(
-//                   employees.picture,
-//                   fit: BoxFit.cover,
-//                 ),
-//               ),
-//             ),),
-//
-//           const SizedBox(height: 4,),
-//           Text(
-//             employees.name,
-//             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
-//           ),
-//           const SizedBox(height: 4),
-//           Text(
-//             employees.job,
-//             style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold),
-//           ),
-//         ],
-//       ),
-//     ),
-//   );
-// }
-// class Employee{
-//   final String picture;
-//   final String name;
-//   final String job;
-//   final String id;
-//
-//   const Employee({
-//     required this.picture,
-//     required this.name,
-//     required this.job,
-//     required this.id,
-//
-//   });
-//   static Employee fromJson(json) => Employee(
-//     name: json['name'],
-//     picture: json['picture'],
-//     job: json['job'],
-//     id: json['_id'],
-//
-//   );
-// }
 
 class Emp {
   String price;

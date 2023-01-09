@@ -70,12 +70,13 @@ class _accountState extends State<account> {
     salon.googlemaps = decoded['googlemaps'];
     salon.address = decoded['address'];
     salon.id = decoded['_id'];
+     salon.openTime = decoded['openTime'];
+     salon.closeTime = decoded['closeTime'];
+
+    });
 
     circular = false;
 
-    });
-    salon.openTime = decoded['openTime'];
-    salon.closeTime = decoded['closeTime'];
   }
   void edit() async {
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
 import 'account.dart';
+import 'addService.dart';
 import 'employee.dart';
 import 'offers.dart';
 import 'make_offer.dart';
@@ -203,10 +204,10 @@ class _BodyState extends State<Body> {
                     Expanded(
                       child: InkWell(
                         onTap:() {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (context) => const makeOffer(),
-                          // )
-                          // );
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const addService(),
+                          )
+                          );
                         },
                         child: Container(
                           child: Column(
@@ -242,10 +243,10 @@ class _BodyState extends State<Body> {
                     Expanded(
                       child: InkWell(
                         onTap:() {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (context) => const services(),
-                          // )
-                          // );
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const services(),
+                          )
+                          );
                         },
                         child: Container(
                           child: Column(

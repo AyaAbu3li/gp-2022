@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/screens/admin/admin_screen.dart';
+import 'package:purple/screens/salon/salon_screen.dart';
 import '../../../Model/Offer.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
@@ -83,7 +84,7 @@ class _OfferPageRequest2State extends State<Offer_Page2> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   onPressed: () =>  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => adminScreen())),
+                      context, MaterialPageRoute(builder: (context) => salonScreen())),
                 ),
               ],
             ),

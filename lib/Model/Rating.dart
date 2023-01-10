@@ -1,5 +1,5 @@
 class  Rating {
-  final double rating;
+  final int rating;
   final String id;
 
   const Rating( {

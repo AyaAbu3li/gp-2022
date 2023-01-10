@@ -248,30 +248,6 @@ class _makeOfferState extends State<makeOffer> {
                       ],
                     ),
                     SizedBox(height: SizeConfig.screenHeight * 0.01),
-
-                  // SizedBox(
-                  //   width: SizeConfig.screenWidth * 0.55,
-                  //   height: getProportionateScreenHeight(45),
-                  //   child:
-                  //   TextButton(
-                  //     style: TextButton.styleFrom(
-                  //       backgroundColor: kPrimaryColor,
-                  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
-                  //     ),
-                  //     onPressed: () {
-                  //       Navigator.of(context).push(MaterialPageRoute(
-                  //         builder: (context) => const services()
-                  //       )
-                  //       );
-                  //           },
-                  //     child: Text('Choose services',
-                  //       style: TextStyle(
-                  //         fontSize: getProportionateScreenWidth(18),
-                  //         color: Colors.white)
-                  //     ),
-                  //   ),
-                  // ),
-
                     Container(
                       height:480,
                       color: Colors.grey.withOpacity(0.1),

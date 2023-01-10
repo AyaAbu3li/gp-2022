@@ -29,7 +29,7 @@ class _salonsdetailsState extends State<salonsdetails> {
 
   bool serviceempty = false;
   bool empEmpty = false;
-  double num = 0;
+  int num = 0;
   bool circular = true;
 
   @override
@@ -203,7 +203,7 @@ class _salonsdetailsState extends State<salonsdetails> {
 
   }
 
-  List<double> items = [];
+  List<int> items = [];
 
 
   late String currentCategory;
@@ -256,7 +256,7 @@ class _salonsdetailsState extends State<salonsdetails> {
                       SizedBox(height: 50,
                           child:
                           RatingBarIndicator(
-                              rating: this.num,
+                              rating: this.num.toDouble(),
                               itemCount: 5,
                               itemSize: 30.0,
                               itemBuilder: (context, _) => const Icon(

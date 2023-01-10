@@ -11,7 +11,6 @@ import '../../../constants.dart';
 import '../../../size_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
-
 import '../../salon/salon_screen.dart';
 
 class SignForm extends StatefulWidget {
@@ -41,6 +40,7 @@ class _SignFormState extends State<SignForm> {
     }
     var decoded = json.decode(res.body);
     global.token = decoded['token'];
+    print(global.token);
     Map<String, dynamic> u = decoded['user'];
     global.city = u['city'];
     if(u['role'] == 0) { // user

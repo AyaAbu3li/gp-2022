@@ -4,18 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:purple/Model/Rating.dart';
 import 'package:purple/Model/category.dart';
-import 'package:purple/components/default_button.dart';
-import 'package:purple/size_config.dart';
 import '../../constants.dart';
 import 'package:purple/screens/user/services.dart';
-import 'AllSalonPage.dart';
 import 'BookingScreen.dart';
-import 'Feedbackk.dart';
-import 'HomeScreen.dart';
 import '../../Model/Serv.dart';
 import '../../../Model/salon.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
+import 'package:purple/global.dart' as global;
 
 class SalonPage extends StatefulWidget {
   final String text;
@@ -35,7 +31,7 @@ class _SalonPageState extends State<SalonPage> {
 
   bool serviceempty = false;
   bool empEmpty = false;
-  double num = 0;
+  int num = 0;
   bool circular = true;
 
   @override
@@ -122,14 +118,11 @@ class _SalonPageState extends State<SalonPage> {
         num = 0;
         return;
       }
-      print(RatingS.length);
-      print(RatingS[0].rating);
 
       for(int i=0; i<RatingS.length; i++){
-          items.add(RatingS[i].rating);
+          items.add(RatingS[i].rating.toInt());
         }
       num = items.reduce(max);
-
     });
 
         circular = false;
@@ -140,6 +133,21 @@ class _SalonPageState extends State<SalonPage> {
     }
   }
 
+  void rate() async{
+    try{
+    var res5 = await http.post(Uri.parse("http://"+ip+":3000/CRrating/"+salon.email),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+        'Authorization': global.token
+      },
+        body: <String, String>{
+          'rating': rating2.toString()
+        });
+    } catch(e){
+      print(" hiiii");
+      print(e);
+    }
+  }
   void fun() async {
     var ser;
 
@@ -158,12 +166,13 @@ class _SalonPageState extends State<SalonPage> {
 
   }
 
-  List<double> items = [];
+  List<int> items = [];
 
 
   late String currentCategory;
   int current = 0;
-  double rating = 0;
+  int rating = 0;
+  int rating2 = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -211,28 +220,8 @@ class _SalonPageState extends State<SalonPage> {
                      SizedBox(height: 10),
                      SizedBox(height: 50,
                        child:
-                       // bulidRating(),
-                       // RatingBar.builder(
-                       //   initialRating: 3.5,
-                       //   minRating: 1,
-                       //   direction: Axis.horizontal,
-                       //   allowHalfRating: true,
-                       //   itemCount: 4,
-                       //   updateOnDrag: true,
-                       //   itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
-                       //   itemBuilder: (context, _) => Icon(
-                       //     Icons.star,
-                       //     color: Colors.amber,
-                       //   ),
-                       //   onRatingUpdate: (rating) {
-                       //     print(rating);
-                       //      setState(() {
-                       //        this.rating = rating;
-                       //      });
-                       //   },
-                       // ),
                          RatingBarIndicator(
-                             rating: this.num,
+                             rating: this.num.toDouble(),
                              itemCount: 5,
                              itemSize: 30.0,
                              itemBuilder: (context, _) => const Icon(
@@ -241,11 +230,10 @@ class _SalonPageState extends State<SalonPage> {
                              )
                          )
                      ),
-
                      serviceempty ? SizedBox(height: getProportionateScreenWidth(1))
                      :ElevatedButton(
                        onPressed: (){
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen()));
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen(salon.email)));
                        },
                        child: Text("Book Now",
                          style: TextStyle(
@@ -511,7 +499,7 @@ class _SalonPageState extends State<SalonPage> {
                  SizedBox(height: 8),
                  Container(
                    margin:  const EdgeInsets.all(0),
-                   height: 300,
+                   height: 250,
                    width: double.infinity,
                    child: Column(
                      children: [
@@ -610,121 +598,116 @@ class _SalonPageState extends State<SalonPage> {
                  ),
                ],
              ),
-             SizedBox(height: 24),
+             SizedBox(height: 10),
+             Align(
+                 alignment: Alignment.centerLeft,
+                 child: Padding(
+                   padding: const EdgeInsets.only(left: 15.0),
+                   child: Text(
+                       "Rate our Salon !",
+                       style: TextStyle(color: Colors.purple.shade900,
+                           fontSize: 24,
+                           fontWeight: FontWeight.bold),
+                       textAlign: TextAlign.left),
+                 )
+             ),
 
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 10.0),
-          //   child: Align( alignment: Alignment.centerLeft,
-          //       child: Text("Write your feedback !"
-          //         ,style: TextStyle(color: Colors.purple.shade900,fontSize: 30,),)),
-          // ),
-          //   // SizedBox(height: 13,),
-          // Padding(
-          //     padding: EdgeInsets.all(8.0),
-          //   child: TextField(
-          //     maxLines: 4,
-          //     decoration: InputDecoration(
-          //       contentPadding: EdgeInsets.all(10),
-          //      hintText: "Enter your text here ",
-          //       enabledBorder: OutlineInputBorder(
-          //         borderSide: BorderSide(width: 3, color: Colors.grey.shade300),
-          //         borderRadius: BorderRadius.circular(20.0),
-          //       ),
-          //     ),
-          //
-          //
-          //   ),
-          // ),
-          //
-          //
-          //    SizedBox(height: 6,),
-          //
-          //    ElevatedButton(
-          //      onPressed: (){
-          //
-          //      },
-          //      child: Text("Send", style: TextStyle(
-          //        fontSize: 20,
-          //        letterSpacing: 3,
-          //        color: Colors.white,
-          //      ),),
-          //      style: ElevatedButton.styleFrom(
-          //        primary: Colors.purple.shade900,
-          //        padding: EdgeInsets.symmetric(horizontal: 50),
-          //        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          //      ),
-          //    ),
-          //    ElevatedButton(
-          //      onPressed: (){
-          //        Navigator.push(context, MaterialPageRoute(builder: (context) => Feedbackk()));
-          //      },
-          //      child: Text("See others feedback >", style: TextStyle(
-          //        fontSize: 20,
-          //        letterSpacing: 2,
-          //        color: Colors.white,
-          //      ),),
-          //      style: ElevatedButton.styleFrom(
-          //        primary: Colors.purple.withOpacity(0.1),
-          //        padding: EdgeInsets.symmetric(horizontal: 50),
-          //        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          //      ),
-          //    ),
-             SizedBox(height: 40),
+             SizedBox(height: 20),
+
+
+
+
+             SizedBox(height: 50,
+                 child:
+                 RatingBarIndicator(
+                     rating: this.rating2.toDouble(),
+                     itemCount: 5,
+                     itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                     itemBuilder: (context, _) => const Icon(
+                       Icons.star,
+                       color: Colors.amber,
+                     )
+                 )
+             ),
+             SizedBox(height: 20),
+             Text(
+                 "rating: $rating2",
+                 style: TextStyle(color: Colors.purple.shade900,
+                     fontSize: 24,
+                   ),
+                 textAlign: TextAlign.left),
+             SizedBox(height: 5),
+
+             ElevatedButton(
+               onPressed: (){
+                 showRating();
+               },
+               child: Text("Rate us", style: TextStyle(
+                 fontSize: 20,
+                 letterSpacing: 3,
+                 color: Colors.white,
+               ),),
+               style: ElevatedButton.styleFrom(
+                 primary: Colors.purple,
+                 padding: EdgeInsets.symmetric(horizontal: 50),
+                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+               ),
+             ),
+                SizedBox(height: 40),
            ],
          ),
        ),
      ),
     );
 
-    // Widget bulidRating() => RatingBar.builder(
-    //   minRating: 1,
-    //   direction: Axis.horizontal,
-    //   allowHalfRating: true,
-    //   itemCount: 4,
-    //   updateOnDrag: true,
-    //   itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
-    //   itemBuilder: (context, _) => Icon(
-    //     Icons.star,
-    //     color: Colors.amber,
-    //   ),
-    //   onRatingUpdate: (rating) {
-    //     print(rating);
-    //     setState(() {
-    //       this.rating = rating;
-    //     });
-    //   },
-    // );
-
-    // void showRating() => showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: Text('Rate this Salon'),
-    //     content: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.center,
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: [
-    //         Text('please leave a star rating.',
-    //             style: TextStyle(fontSize: 20)
-    //         ),
-    //         const SizedBox(height: 32)
-    //       ],
-    //     ),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () {
-    //           Navigator.of(context).pop();
-    //         },
-    //         child: Text('OK',
-    //             style: TextStyle(fontSize: 20)
-    //         ),
-    //         bulidRating(),
-    //       )
-    //     ],
-    //   ),
-    // );
-
-
   }
+
+
+  Widget bulidRating() => RatingBar.builder(
+    minRating: 1,
+    direction: Axis.horizontal,
+    // allowHalfRating: true,
+    itemCount: 5,
+    updateOnDrag: true,
+    itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+    itemBuilder: (context, _) => Icon(
+      Icons.star,
+      color: Colors.amber,
+    ),
+    onRatingUpdate: (rating) {
+      setState(() {
+        this.rating2 = rating.toInt();
+      });
+    },
+  );
+  void showRating() => showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Rate this Salon'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('please leave a star rating.',
+              style: TextStyle(fontSize: 20)
+          ),
+          const SizedBox(height: 32),
+          bulidRating(),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            rate();
+            Navigator.of(context).pop();
+          },
+          child: Text('OK',
+              style: TextStyle(fontSize: 20)
+          ),
+        )
+      ],
+    ),
+  );
 
   double getProportionateScreenWidth(double inputWidth) {
     double screenWidth = 500;

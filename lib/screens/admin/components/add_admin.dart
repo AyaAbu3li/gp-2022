@@ -30,7 +30,8 @@ class _addAdminState extends State<addAdmin> {
             'password': user.password,
             'phone': user.phone,
             'picture': user.picture,
-            'role': '2'
+            'role': '2',
+            'city': 'Jenin'
           });
       if(res.statusCode == 400){
         setState(() {

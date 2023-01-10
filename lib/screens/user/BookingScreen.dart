@@ -1,43 +1,152 @@
-import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:collection';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../../../Model/category.dart';
+import '../../../Model/salon.dart';
+import '../../../constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:purple/global.dart' as global;
 
-// import 'book.dart';
-//import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../size_config.dart';
 
-//final currentStep = StateProvider((ref) => 1);
-//final selectedCity = StateProvider((ref) => '');
-//final selectedSalon = StateProvider((ref) => '');
 
 class BookingScreen extends StatefulWidget {
-  const BookingScreen({Key? key}) : super(key: key);
-
-
-
+  final String text;
+  const BookingScreen(this.text);
   @override
   State<BookingScreen> createState() => _BookingScreenState();
 }
 
-
-
 class _BookingScreenState extends State<BookingScreen> {
 
-  List<String> sec = [
-    "MAKEUP",
-    "HAIR",
-    "FACE",
-    "LASER",
-    "NAILS",
-    "SCIN CARE",
-    "WEDDING",
-  ];
-  List<ServiceModel> service = [
-    ServiceModel("service 1 ", false),
-    ServiceModel("service 2 ", false),
-    ServiceModel("service 3 ", false),
-    ServiceModel("service 4 ", false),
 
-  ];
-  List<ServiceModel> selectedService = [];
+  Salon salon = Salon('','','','','','','','','','','','');
+  List<Category> cate = [];
+  List<Servicee> serviceee = [];
+  List<Servicee> serviceee2 = [];
+
+  List<Servicee> serCate = [];
+  Map<String, Servicee> type = new HashMap();
+
+  bool circular = true;
+  bool empty = false;
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+  void fetchData() async {
+
+    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+widget.text),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    var cat;
+    cat = json.decode(res3.body);
+
+    setState(() {
+      this.cate = cat.map<Category>(Category.fromJson).toList();
+    });
+
+    for (int x = 0; x < cate.length; x++) {
+      var res4 = await http.get(
+        Uri.parse("http://" + ip + ":3000/services/" + widget.text),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+        },
+      );
+      var ser = json.decode(res4.body);
+      setState(() {
+        this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
+        this.serviceee2 = ser.map<Servicee>(Servicee.fromJson).toList();
+      });
+      this.serCate = serviceee2;
+      serCate.removeWhere((data) => data.category != cate[x].category);
+
+      for (int j = 0; j < serCate.length; j++) {
+        _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+      }
+    }
+
+    circular = false;
+  }
+  Map<Category,List<Servicee>> _map = Map();
+
+  List<Servicee> selectedService = [];
+
+
+
+  void makeBooking() async {
+    try{
+      // var res = await http.post(Uri.parse("http://"+ip+":3000/offers"),
+      //     headers: <String, String>{
+      //       'Context-Type': 'application/json;charSet=UTF-8',
+      //       'Authorization': global.token
+      //     },
+      //     body: <String, String>{
+      //       'name': offer.name,
+      //       'startdate': offer.startdate,
+      //       'enddate': offer.enddate,
+      //       'price': offer.price
+      //     });
+      // var decoded = json.decode(res.body);
+      //
+      // setState(() {
+      //   offer.id = decoded['_id'];
+      // });
+
+      // for(int x = 0 ; x < selectedService.length ; x++) {
+      //   var res2 = await http.post(
+      //       Uri.parse("http://" + ip + ":3000/offerservice"),
+      //       headers: <String, String>{
+      //         'Context-Type': 'application/json;charSet=UTF-8',
+      //         'Authorization': global.token
+      //       },
+      //       body: <String, String>{
+      //         'service': selectedService[x].name,
+      //         'owner': offer.id
+      //       });
+      // }
+
+      showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              title: Text('Added'),
+              content: Text("Offer has been successfully added"),
+              actions: [
+                TextButton(
+                  child: Text('OK',
+                      style: TextStyle(
+                        fontSize: getProportionateScreenWidth(14),
+                        color: Colors.white,)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: kPrimaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  onPressed: () =>
+                      Navigator.pop(context),
+                ),
+              ],
+            ),
+      );
+
+
+    } catch(e){
+      print("Make booking");
+      print(e);
+    }
+  }
+
+
+
+
   int currentStep = 0;
   DateTime today = DateTime.now();
   void _onDaySelected(DateTime day, DateTime focusedDay){
@@ -76,12 +185,12 @@ class _BookingScreenState extends State<BookingScreen> {
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.purple,
           title: Text("Make a Reservation"),
           centerTitle: true,
-
         ),
-        body: Theme(
+        body:circular
+        ? Center(child: CircularProgressIndicator())
+        : Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(primary: Colors.purple),
           ),
@@ -103,100 +212,74 @@ class _BookingScreenState extends State<BookingScreen> {
             onStepTapped: (step) => setState( () => currentStep = step),
             onStepCancel:
                 currentStep == 0 ? null : () => setState(() => currentStep -= 1),
-
-
-
-/*
-                controlsBuilder: (BuildContext context, {onStepContinue, onStepCancel}) {
-                return Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Row(
-                    children: [
-                      Expanded(child:
-                      ElevatedButton(
-                        child: Text(
-                          'BACK',
-                        ),
-                        onPressed: onStepContinue,
-                      ),
-                      ),
-                    ],
-                  ),
-
-
-              );
-                 },
-*/
-
-
         ),
       ),
       ),
     );
-
-
   }
 
   Widget buildCard({
-    required String sec,
+    required Category sec,
   }) => Container(
     width: double.infinity,
     color: Colors.white,
     height: 200,
 
     child: Column(
-      //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10.0,top: 10),
           child: Align(
             alignment: Alignment.topLeft,
             child: Text(
-              sec,
-              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.black87.withOpacity(0.5),),
+              sec.category,
+              style:
+              TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87.withOpacity(0.5)),
             ),
           ),
         ),
 
         Expanded(
           child: Container(
-            //  color: Colors.green,
-
             child: ListView.builder(
-                itemCount: service.length,
-                itemBuilder: (BuildContext context , int index){
-                  return ServiceItem(service[index].serviceName,
-                      service[index].isSelected, index);
-                }),
+              itemCount: _map[sec]!.length,
+              itemBuilder: (BuildContext context , int index)=>
+                  ServiceItem(serv: _map[sec]![index]),
+            ),
           ),
         ),
-
-
       ],
-
     ),
   );
 
-  Widget ServiceItem(String name, bool isSelected , int index){
+  Widget ServiceItem({required Servicee serv}){
     return ListTile(
 
-      title: Text(name,style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
-      trailing: isSelected
-          ? Icon(Icons.check_circle,color: Colors.blue,)
-          : Icon(Icons.check_circle_outline_outlined,color: Colors.grey,),
+      title: Text(
+          serv.name,
+          style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 18)
+      ),
+      trailing: serv.isSelected
+
+          ? Icon(Icons.check_circle,color: Colors.purple)
+          : Icon(Icons.check_circle_outline_outlined,color: Colors.grey),
       onTap: (){
         setState(() {
-          service[index].isSelected = !service[index].isSelected;
-          if(service[index].isSelected == true) {
-            selectedService.add(ServiceModel(name, true));
+          serv.isSelected = !serv.isSelected;
+          if(serv.isSelected == true) {
+            selectedService.add(serv);
           }
-          else if (service[index].isSelected == false){
+          else if (serv.isSelected == false){
             selectedService.removeWhere((element) =>
-            element.serviceName == service[index].serviceName);
+            element.id == serv.id);
           }
+          print(selectedService);
         });
-
-
       },
     );
   }
@@ -207,159 +290,110 @@ class _BookingScreenState extends State<BookingScreen> {
       content: SingleChildScrollView(
       child: Column(
         children: [
-
-
-          Row(
+          Column(
             children: [
-
-              Padding(
-                padding: const EdgeInsets.only(left: 1.0),
-                child: Column(
-                  children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          "Services",
-                          style: TextStyle(color: Colors.purple.shade900,fontSize: 26,fontWeight: FontWeight.bold,),textAlign: TextAlign.left,)),
-                    SizedBox(height: 0,),
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 0.0),
-                          child: Text(
-                            "Select your needs",
-                            style: TextStyle(color: Colors.black54,fontSize: 19,),textAlign: TextAlign.left,),
-                        )),
-
-                  ],
-                ),
+              Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "Services",
+                    style: TextStyle(
+                      color: Colors.purple.shade900,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left)
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: Container(
-                  width: (MediaQuery.of(context).size.width) * 0.45,
-
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.purple.shade300.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextField(
-                    onChanged:(value) {
-                      // search code
-                    },
-
-                    decoration: InputDecoration(
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText:
-                      'Srarch Services',
-
-                      prefixIcon: Icon(Icons.search),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ),
+              Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 0.0),
+                    child: Text(
+                      "Select your needs",
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 19),
+                      textAlign: TextAlign.left),
+                  )
               ),
-              SizedBox(height: 10,),
-
             ],
           ),
+          SizedBox(height: 10),
+          Container(
+            width: (MediaQuery.of(context).size.width) * 0.9,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.purple.shade300.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TextField(
+              onChanged:(value) {
+                // search code
+              },
 
-          SizedBox(
-            height: 2,
+              decoration: InputDecoration(
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintText:
+                'Srarch Services',
+                prefixIcon: Icon(Icons.search),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+              ),
+            ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              height:480,
-              color: Colors.grey.withOpacity(0.1),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-
-                  Expanded(
-                    child: Container(
-                      //    height: 300,
-                      //   color: Colors.green,
-                      child: ListView.separated(
-                        padding: EdgeInsets.only(left: 10,right: 10),
-                        scrollDirection: Axis.vertical,
-                        itemCount: sec.length,
-                        separatorBuilder: (context, _) => SizedBox(height: 14,),
-                        itemBuilder: (context,index) => buildCard(sec: sec[index]),
-
-
-                      ),
+          SizedBox(height: 10),
+          Container(
+            height:480,
+            color: Colors.grey.withOpacity(0.1),
+            width: double.infinity,
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                Expanded(
+                  child: Container(
+                    child: ListView.separated(
+                      padding: EdgeInsets.only(left: 10,right: 10),
+                      scrollDirection: Axis.vertical,
+                      itemCount: cate.length,
+                      separatorBuilder: (context, _) => SizedBox(height: 14),
+                      itemBuilder: (context,index) => buildCard(sec: cate[index]),
                     ),
                   ),
-
-                ],
-              ),
-
+                ),
+              ],
             ),
           ),
-
-
-          /*
-          ElevatedButton(
-            onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => book()));
-
-            },
-            child: Text("NEXT", style: TextStyle(
-              fontSize: 20,
-              letterSpacing: 5,
-              color: Colors.white,
-            ),),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.purple.shade600,
-              padding: EdgeInsets.symmetric(horizontal: 150,vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          ),
-
-           */
-          //   value: SystemUiOverlayStyle.light,
         ],
       ),
-    ),),
+    ),
+    ),
     Step(state: currentStep > 1 ? StepState.complete : StepState.indexed,
       isActive: currentStep >= 1,title: Text('Book a spot'), content: SingleChildScrollView(
       child: Column(
         children: [
           Text("Select the appropriate day ", style: TextStyle(fontSize: 22,color: Colors.purple),),
-          Padding(
-            padding: const EdgeInsets.only(left: 15.0, right: 15,top: 4,bottom: 10),
-            child: Container(
-              // color: Colors.purple.withOpacity(0.1),
-              child: TableCalendar(
-                rowHeight: 40,
-                headerStyle: HeaderStyle(formatButtonVisible: false,titleCentered: true),
-                availableGestures: AvailableGestures.all,
-                selectedDayPredicate: (day) => isSameDay(day, today),
-                focusedDay: today,
-                firstDay: DateTime.utc(2010,10,16),
-                lastDay: DateTime.utc(2030,3,14),
-                onDaySelected: _onDaySelected,
-              ),
+          Container(
+            child: TableCalendar(
+              rowHeight: 45,
+              headerStyle: HeaderStyle(formatButtonVisible: false,titleCentered: true),
+              availableGestures: AvailableGestures.all,
+              selectedDayPredicate: (day) => isSameDay(day, today),
+              focusedDay: today,
+              firstDay: DateTime.now(),
+              lastDay: DateTime.utc(2030,3,14),
+              onDaySelected: _onDaySelected,
             ),
           ),
-          SizedBox(height: 22),
           SizedBox(height: 15),
-          Text("Select the appropriate Time ", style: TextStyle(fontSize: 22,color: Colors.purple),),
+          Text("Select the appropriate Time ",
+            style: TextStyle(
+                fontSize: 22,
+                color: Colors.purple)
+          ),
           SizedBox(height: 15),
           Container(
-            margin:  const EdgeInsets.only(left: 0,right: 7),
             height: 70,
-            //   color: Colors.blue,
             width: double.infinity,
             child: Column(
               children: [
@@ -378,9 +412,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                 setState(() {
                                   current= index;
                                 });
-
                               },
-
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 300),
                                 margin: EdgeInsets.all(4),
@@ -391,16 +423,12 @@ class _BookingScreenState extends State<BookingScreen> {
                                     color: current == index
                                         ? Colors.purple.withOpacity(0.3)
                                         : Colors.white,
-
                                     border: current == index
                                         ?Border.all(
                                         color: Colors.purple,width: 2)
                                         : Border.all(
                                         color: Colors.grey,width: 2)
-
-
                                 ),
-
                                 child: Center(
                                   child: Text(
                                     items[index],
@@ -408,18 +436,14 @@ class _BookingScreenState extends State<BookingScreen> {
                                       color: current== index
                                           ? Colors.purple.shade900
                                           : Colors.grey,
-
                                       fontSize:  current== index
                                           ? 15
                                           : null,
-
-
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-
                           ],
                         );
                       }
@@ -427,21 +451,16 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ],
             ),
-
           ),
-          SizedBox(height: 9,),
-
-
-          Text("Selected Day = " + today.toString().split(" ")[0],style: TextStyle(fontSize:12,color: Colors.black,),),
-          Text("Selected Time = " +items[current],style: TextStyle(fontSize: 12,color: Colors.black,),),
-
-          SizedBox(
-            height: 30,
-          ),
-          //   value: SystemUiOverlayStyle.light,
+          Text("Selected Day = " + today.toString().split(" ")[0],
+            style: TextStyle(fontSize:18,color: Colors.black)),
+          Text("Selected Time = " + items[current],
+            style: TextStyle(fontSize: 18,color: Colors.black)),
+          SizedBox( height: 10),
         ],
       ),
-    ),),
+    ),
+    ),
     Step(isActive: currentStep >= 2,title: Text('Checkout'), content: SingleChildScrollView(
       child: Column(
         children: [
@@ -585,12 +604,30 @@ class _BookingScreenState extends State<BookingScreen> {
   ];
 }
 
-class ServiceModel{
-  String serviceName;
+class Servicee {
+  final String name;
+  final String price;
+  final String category;
+  final String id;
   bool isSelected;
 
-  ServiceModel(this.serviceName, this.isSelected);
 
+  Servicee({
+    required this.name,
+    required this.price,
+    required this.category,
+    required this.id,
+    required this.isSelected,
+
+  });
+  static Servicee fromJson(json) => Servicee(
+    name: json['name'],
+    price: json['price'].toString(),
+    category: json['category'],
+    id: json['_id'],
+    isSelected: json['isSelected'],
+
+  );
 }
 
 

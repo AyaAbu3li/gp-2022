@@ -29,7 +29,7 @@ class salonScreen extends StatelessWidget {
   }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-  User user = User('','','','','');
+  User user = User('', '','','','','');
   @override
   void initState() {
     super.initState();

@@ -68,7 +68,7 @@ class _SignFormState extends State<SignForm> {
   String email = "";
   String password = "";
 
-  User user = User('', '','','','');
+  User user = User('', '','','','','');
   bool _isObscure = true;
   String data = '';
   String errorPassImg = "assets/icons/white.svg";

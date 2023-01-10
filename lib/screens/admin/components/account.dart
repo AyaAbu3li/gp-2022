@@ -20,7 +20,7 @@ class account extends StatefulWidget {
 class _accountState extends State<account> {
   final _formKey = GlobalKey<FormState>();
 
-  User user = User('','','','','');
+  User user = User('', '','','','','');
   bool circular = true;
   String errorPhoneImg ="assets/icons/white.svg";
   String phone ='';

@@ -21,7 +21,7 @@ class _MyAccountState extends State<MyAccount> {
   _MyAccountState(){
     valueChoose= listItem[0];
   }
-  User user = User('','','','','');
+  User user = User('', '','','','','');
   bool circular = true;
   String errorPhoneImg ="assets/icons/white.svg";
   String phone ='';

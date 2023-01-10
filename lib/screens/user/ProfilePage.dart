@@ -17,7 +17,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  User user = User('','','','','');
+  User user = User('', '','','','','');
   bool circular = true;
 
   @override

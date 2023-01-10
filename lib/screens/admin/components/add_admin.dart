@@ -68,7 +68,7 @@ class _addAdminState extends State<addAdmin> {
     }
   }
 
-  User user = User('', '','','','');
+  User user = User('', '','','','','');
 
   String Name="";
   String email="";

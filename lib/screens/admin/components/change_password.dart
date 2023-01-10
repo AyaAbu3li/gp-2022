@@ -24,7 +24,7 @@ class _changePasswordState extends State<changePassword> {
   String pass2 ='';
   bool _isObscure = true;
   bool _isObscure2 = true;
-  User user = User('','','','','');
+  User user = User('', '','','','','');
   String password2 = '';
 
 

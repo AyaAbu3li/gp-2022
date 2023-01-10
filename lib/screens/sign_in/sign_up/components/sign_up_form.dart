@@ -28,7 +28,9 @@ class _SignUpFormState extends State<SignUpForm> {
           'email': user.email,
           'password': user.password,
           'phone': user.phone,
-          'picture': user.picture
+          'picture': user.picture,
+          'city': user.city
+
         });
       if(res.statusCode == 400){
         setState(() {
@@ -67,7 +69,7 @@ class _SignUpFormState extends State<SignUpForm> {
     }
   }
 
-  User user = User('', '','','','');
+  User user = User('', '','','','','');
 
   String Name="";
   String email="";

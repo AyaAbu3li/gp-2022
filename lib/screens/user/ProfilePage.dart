@@ -64,7 +64,6 @@ class _ProfilePageState extends State<ProfilePage> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: Text("Profile"),
-        backgroundColor: Colors.purple.shade300,
       ),
       body: circular
           ? Center(child: CircularProgressIndicator())

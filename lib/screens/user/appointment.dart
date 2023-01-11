@@ -75,7 +75,6 @@ class _AppointmentState extends State<Appointment> {
         backgroundColor: Colors.white,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: Colors.purple.shade300,
           elevation: 10,
           title: const Text('My Appointment '),
           centerTitle: true,

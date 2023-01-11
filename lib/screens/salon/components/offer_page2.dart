@@ -108,14 +108,6 @@ class _OfferPageRequest2State extends State<Offer_Page2> {
           : Column(
         children: [
           SizedBox(height: 20),
-          // Align(
-          //   alignment: Alignment.center,
-          //   child: Text(
-          //     offer.name,
-          //     style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,),
-          //   ),
-          // ),
-          // const SizedBox(height: 8,),
           Image.asset(offer.picture,height: 150,width:300,fit: BoxFit.cover,),
           const SizedBox(height: 16,),
           Padding(
@@ -155,8 +147,27 @@ class _OfferPageRequest2State extends State<Offer_Page2> {
                       ),
                     ),
                   ),
-                  SizedBox(height: getProportionateScreenHeight(260),
-                      child: buildSalons(service)),
+                  SizedBox(height: 10),
+                  SizedBox(height: getProportionateScreenHeight(235),
+                    child:
+                    // buildSalons(service)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30),
+                      child:
+                      Column(
+                        children: [
+                          ListView.separated(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: service.length,
+                            separatorBuilder: (context, _) => SizedBox(height: 10),
+                            itemBuilder: (BuildContext context, int index) =>
+                                ServiceItem2(serv: service[index]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Text(
@@ -198,28 +209,33 @@ class _OfferPageRequest2State extends State<Offer_Page2> {
     );
   }
 
-  Widget buildSalons(List<Service> saloons) => ListView.builder(
-    itemCount: saloons.length,
-    itemBuilder: (context,index){
-      final saloon = saloons[index];
-      return Card(
-        child:
-        Container(
-          height: getProportionateScreenHeight(50),
-          color: Colors.purple.withOpacity(0.15),
-          child:  Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(saloon.name,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.black))
+  Widget ServiceItem2({required Service serv}){
+    return
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5.0),
+            decoration: new BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
               ),
-            ],
-          ),
-        ),
+              color: Colors.white,
+            ),
+            // height: 35.0,
+            child:
+            Text(serv.name,
+                style:
+                TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black.withOpacity(0.70)
+                )
+            ),
+          )
+        ],
       );
-    },
-  );
+  }
 }
 
 class Service {

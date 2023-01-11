@@ -70,7 +70,9 @@ Widget build(BuildContext context) => DefaultTabController(
         ],
       ),
     ),
-    body: TabBarView(
+    body: circular
+        ? Center(child: CircularProgressIndicator())
+        :TabBarView(
         children: [
          empty
         ? Center(child: Text("No offers",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black)))

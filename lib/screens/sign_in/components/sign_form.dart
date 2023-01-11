@@ -45,7 +45,7 @@ class _SignFormState extends State<SignForm> {
     global.city = u['city'];
     if(u['role'] == 0) { // user
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            context, MaterialPageRoute(builder: (context) => HomeScreen(0)));
       } else if(u['role'] == 1) { // saloon
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => salonScreen()));

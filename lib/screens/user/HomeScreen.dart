@@ -4,12 +4,19 @@ import 'Home.dart';
 import 'ProfilePage.dart';
 
 class HomeScreen extends StatefulWidget {
-   HomeScreen({Key? key}) : super(key: key);
+
+   final int page;
+   const HomeScreen(this.page);
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    index = widget.page;
+  }
  int index = 0;
  final screens = [
    Home(),

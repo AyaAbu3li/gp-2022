@@ -46,8 +46,9 @@ class _AllSalonPageState extends State<AllSalonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false,
         title: const Text('All Salons'),
+        centerTitle: true,
         // actions: [
         //   Padding(
         //     padding: const EdgeInsets.all(8.0),

@@ -167,7 +167,14 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return WillPopScope(
+      onWillPop: () async {
+        if(selectedService.isNotEmpty) {
+          final shouldPop = await showWarning(context);
+          return shouldPop ?? false;
+        }
+        return true;
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
@@ -573,176 +580,43 @@ class _BookingScreenState extends State<BookingScreen> {
     Step(isActive: currentStep >= 2,title: Text('Checkout'),
       content:
           lastStep(widget.text,today,items[current],selectedService,priceTotal),
-    //   SingleChildScrollView(
-    //   child: Column(
-    //     children: [
-    //       Padding(
-    //         padding: const EdgeInsets.only(left: 0,right: 0),
-    //         child: Container(
-    //           color: Colors.purple.withOpacity(0.04),
-    //           height: 540,
-    //           width: double.infinity,
-    //           child: Column(
-    //             children: [
-    //               SizedBox(height: 5),
-    //               Text("Salon Name",
-    //                 style: TextStyle(
-    //                   fontSize: 26,
-    //                   fontWeight: FontWeight.bold,
-    //                   color: Colors.purple,
-    //
-    //               ),
-    //               ),
-    //               SizedBox(height: 5),
-    //               Text("Thank you for booking our services!",
-    //                 style: TextStyle(
-    //                     fontSize: 19,
-    //                     // fontWeight: FontWeight.bold,
-    //                     color: Colors.black.withOpacity(0.8)
-    //                 )
-    //               ),
-    //               SizedBox(height: 10),
-    //               Text("BOOKING INFORMATION",
-    //                 style: TextStyle(
-    //                   color: Colors.black,
-    //                     fontSize: 15,
-    //                     fontWeight: FontWeight.bold,
-    //                  ),
-    //               ),
-    //               SizedBox(height: 10),
-    //               Padding(
-    //                 padding: const EdgeInsets.only(left: 18.0),
-    //                 child: Row(
-    //                   children: [
-    //                     Icon(Icons.person),
-    //                     SizedBox(width: 16,),
-    //                     Text(user.name,style: TextStyle(fontSize: 17),)
-    //                   ],
-    //                 ),
-    //               ),
-    //               SizedBox(height: 10,),
-    //               Padding(
-    //                 padding: const EdgeInsets.only(left: 18.0),
-    //                 child: Row(
-    //                   children: [
-    //                     Icon(Icons.calendar_today),
-    //                     SizedBox(width: 16,),
-    //                     Text("Reservation Date :",
-    //                       style: TextStyle(fontSize: 17)
-    //                     ),
-    //                     SizedBox(width: 16),
-    //                     Text(today.toString().split(" ")[0],
-    //                       style: TextStyle(
-    //                           fontSize: 18,
-    //                           fontWeight: FontWeight.bold,
-    //                           color: Colors.black)
-    //                     ),
-    //                   ],
-    //                 ),
-    //               ),
-    //               SizedBox(height: 10,),
-    //               Padding(
-    //                 padding: const EdgeInsets.only(left: 18.0),
-    //                 child: Row(
-    //                   children: [
-    //                     Icon(Icons.timelapse),
-    //                     SizedBox(width: 16,),
-    //                     Text("Reservation Time :",style: TextStyle(fontSize: 17),),
-    //                     SizedBox(width: 16,),
-    //                     Text(items[current],style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.black),),
-    //
-    //                   ],
-    //                 ),
-    //               ),
-    //               SizedBox(height: 15),
-    //               Divider(
-    //                 color: Colors.black54,
-    //                 indent: 0,
-    //                 endIndent: 0,
-    //               ),
-    //               SizedBox(height: 10),
-    //               Text("SERVICES BOOKED",
-    //                 style: TextStyle(
-    //                 color: Colors.black,
-    //                 fontSize: 15,
-    //                 fontWeight: FontWeight.bold,
-    //                 ),
-    //               ),
-    //               SizedBox(height: 5),
-    //               selectedService.isEmpty ?
-    //                   SizedBox(height: 1,)
-    //               :Padding(
-    //                 padding: const EdgeInsets.only(left: 30.0,right: 30),
-    //                 child:
-    //                 Column(
-    //                   children: [
-    //                     ListView.builder(
-    //                       itemCount: selectedService.length,
-    //                       itemBuilder: (BuildContext context , int index)=>
-    //                           ServiceItem2(serv: selectedService[index]),
-    //                     ),
-    //                     // Row(
-    //                     //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                     //   children: [
-    //                     //     Text("Service name",
-    //                     //         style:
-    //                     //         TextStyle(
-    //                     //             fontSize: 17,
-    //                     //             fontWeight: FontWeight.w800,
-    //                     //             color: Colors.black.withOpacity(0.70)
-    //                     //         )
-    //                     //     ),
-    //                     //     SizedBox(width: 16),
-    //                     //     Text("₪30",
-    //                     //       style:
-    //                     //       TextStyle(
-    //                     //           fontSize: 18,
-    //                     //           fontWeight: FontWeight.bold,
-    //                     //           color: Colors.blue.shade900),
-    //                     //     ),
-    //                     //   ],
-    //                     // ),
-    //                   ],
-    //                 ),
-    //               ),
-    //               SizedBox(height: 10),
-    //               Divider(
-    //                 color: Colors.black54,
-    //                 indent: 0,
-    //                 endIndent: 0,
-    //               ),
-    //               SizedBox(height: 10),
-    //               Padding(
-    //                 padding: const EdgeInsets.only(left: 40.0,right: 40),
-    //                 child: Row(
-    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                   children: [
-    //                     Text("TOTAL PRICE",
-    //                       style: TextStyle(
-    //                           fontSize: 22,
-    //                           color: Colors.black),
-    //                     ),
-    //                     SizedBox(width: 16),
-    //                     Text("₪30",
-    //                       style: TextStyle(
-    //                           fontSize: 26,
-    //                           fontWeight: FontWeight.bold,
-    //                           color: Colors.blue.shade900),
-    //                     ),
-    //                   ],
-    //                 ),
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //       SizedBox(height: 10),
-    //     ],
-    //   ),
-    // ),
     ),
   ];
 }
+
+  Future<bool?> showWarning(BuildContext context) async =>
+      showDialog<bool>(
+          context: context,
+          builder: (context) =>
+              AlertDialog(
+                title: Text('Hold on!'),
+                content: Text("Are you sure want to go back?"),
+                actions: [
+                  TextButton(
+                    child: Text('No',
+                        style: TextStyle(
+                          fontSize: getProportionateScreenWidth(14),
+                          color: Colors.white,)),
+                    style: TextButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                    onPressed: () => Navigator.pop(context,false),
+                  ),
+                  TextButton(
+                    child: Text('Yes',
+                        style: TextStyle(
+                          fontSize: getProportionateScreenWidth(14),
+                          color: Colors.white,)),
+                    style: TextButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                    onPressed: () => Navigator.pop(context,true),
+                  ),
+                ],
+          ),
+      );
 
 class Servicee {
   final String name;

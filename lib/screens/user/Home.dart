@@ -3,6 +3,7 @@ import 'package:purple/size_config.dart';
 import '../../constants.dart';
 import 'AllOfferPage.dart';
 import 'AllSalonPage.dart';
+import 'HomeScreen.dart';
 import 'Notificat.dart';
 import 'OfferPage.dart';
 import 'package:purple/global.dart' as global;
@@ -260,7 +261,7 @@ class _HomeState extends State<Home> {
                   SectionTitle(
                       text: "Salons",
                       press: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => AllSalonPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(1)));
                       }
                   ),
                   SizedBox(height: getProportionateScreenWidth(10)),

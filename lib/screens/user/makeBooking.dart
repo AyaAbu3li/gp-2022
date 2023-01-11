@@ -142,7 +142,7 @@ class _DoneBookingState extends State<DoneBooking> {
               text: "Back to home",
               press: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => HomeScreen()));
+                    context, MaterialPageRoute(builder: (context) => HomeScreen(0)));
               },
             ),
           ),

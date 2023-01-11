@@ -5,7 +5,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:purple/Model/Rating.dart';
 import 'package:purple/Model/category.dart';
 import '../../constants.dart';
-import 'package:purple/screens/user/services.dart';
 import 'BookingScreen.dart';
 import '../../Model/Serv.dart';
 import '../../../Model/salon.dart';
@@ -233,7 +232,7 @@ class _SalonPageState extends State<SalonPage> {
                      serviceempty ? SizedBox(height: getProportionateScreenWidth(1))
                      :ElevatedButton(
                        onPressed: (){
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen(salon.email)));
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => BookingScreen(widget.text)));
                        },
                        child: Text("Book Now",
                          style: TextStyle(
@@ -391,7 +390,7 @@ class _SalonPageState extends State<SalonPage> {
                      SizedBox(width: getProportionateScreenWidth(55)),
                      ElevatedButton(
                        onPressed: (){
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                         // Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
                        },
                        child: Text("Call Now",
                          style: TextStyle(
@@ -418,7 +417,7 @@ class _SalonPageState extends State<SalonPage> {
                      SizedBox(width: 10),
                     ElevatedButton(
                      onPressed: (){
-                       Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                       // Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
                      },
                      child: Text("View location in google maps",
                      style: TextStyle(

@@ -1,3 +1,4 @@
+import 'package:purple/screens/user/lastStep.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:collection';
 import 'dart:convert';
@@ -7,8 +8,9 @@ import '../../../Model/salon.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
-
+import '../../Model/user.dart';
 import '../../size_config.dart';
+import 'makeBooking.dart';
 
 
 class BookingScreen extends StatefulWidget {
@@ -19,8 +21,8 @@ class BookingScreen extends StatefulWidget {
 }
 
 class _BookingScreenState extends State<BookingScreen> {
-
-
+  int priceTotal=0;
+  User user = User('','','','','','');
   Salon salon = Salon('','','','','','','','','','','','');
   List<Category> cate = [];
   List<Servicee> serviceee = [];
@@ -31,7 +33,11 @@ class _BookingScreenState extends State<BookingScreen> {
 
   bool circular = true;
   bool empty = false;
-
+  int holiday=2;
+  List<String> days = ["",
+    "monday", "tuesday" , "wednesday",
+    "thursday", "riday", "saturday", "sunday"
+  ];
 
 
 
@@ -41,8 +47,50 @@ class _BookingScreenState extends State<BookingScreen> {
     fetchData();
   }
   void fetchData() async {
+    var res = await http.get(Uri.parse("http://"+ip+":3000/users/me"),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+        'Authorization': global.token
+      },
+    );
+    setState(() {
+      var decoded = json.decode(res.body);
+      user.name = decoded['name'];
+      user.email = decoded['email'];
+      user.picture = decoded['picture'];
+      user.phone = decoded['phone'].toString();
+    });
 
-    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+widget.text),
+    var ress = await http.get(Uri.parse("http://"+ip+":3000/salons/"+widget.text),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    setState(() {
+      var decoded = json.decode(ress.body);
+      salon.name = decoded['name'];
+      salon.email = decoded['email'];
+      salon.picture = decoded['picture'];
+      salon.city = decoded['city'];
+      salon.phone = decoded['phone'].toString();
+      salon.closeTime = decoded['closeTime'];
+      salon.holiday = decoded['holiday'].toLowerCase();
+      salon.openTime = decoded['openTime'];
+      salon.address = decoded['address'];
+      salon.googlemaps = decoded['googlemaps'];
+    });
+
+    for(int x = 1; x<days.length; x++){
+      if(days[x]==salon.holiday){
+        setState(() {
+          holiday = x;
+          print(x);
+        });
+        break;
+      }
+    }
+
+    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+salon.email),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
       },
@@ -56,7 +104,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     for (int x = 0; x < cate.length; x++) {
       var res4 = await http.get(
-        Uri.parse("http://" + ip + ":3000/services/" + widget.text),
+        Uri.parse("http://" + ip + ":3000/services/" + salon.email),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8',
         },
@@ -81,76 +129,15 @@ class _BookingScreenState extends State<BookingScreen> {
   List<Servicee> selectedService = [];
 
 
-
-  void makeBooking() async {
-    try{
-      // var res = await http.post(Uri.parse("http://"+ip+":3000/offers"),
-      //     headers: <String, String>{
-      //       'Context-Type': 'application/json;charSet=UTF-8',
-      //       'Authorization': global.token
-      //     },
-      //     body: <String, String>{
-      //       'name': offer.name,
-      //       'startdate': offer.startdate,
-      //       'enddate': offer.enddate,
-      //       'price': offer.price
-      //     });
-      // var decoded = json.decode(res.body);
-      //
-      // setState(() {
-      //   offer.id = decoded['_id'];
-      // });
-
-      // for(int x = 0 ; x < selectedService.length ; x++) {
-      //   var res2 = await http.post(
-      //       Uri.parse("http://" + ip + ":3000/offerservice"),
-      //       headers: <String, String>{
-      //         'Context-Type': 'application/json;charSet=UTF-8',
-      //         'Authorization': global.token
-      //       },
-      //       body: <String, String>{
-      //         'service': selectedService[x].name,
-      //         'owner': offer.id
-      //       });
-      // }
-
-      showDialog(
-        context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text('Added'),
-              content: Text("Offer has been successfully added"),
-              actions: [
-                TextButton(
-                  child: Text('OK',
-                      style: TextStyle(
-                        fontSize: getProportionateScreenWidth(14),
-                        color: Colors.white,)),
-                  style: TextButton.styleFrom(
-                    backgroundColor: kPrimaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                  onPressed: () =>
-                      Navigator.pop(context),
-                ),
-              ],
-            ),
-      );
-
-
-    } catch(e){
-      print("Make booking");
-      print(e);
-    }
-  }
-
-
-
-
   int currentStep = 0;
+  DateTime pre = DateTime.now();
   DateTime today = DateTime.now();
   void _onDaySelected(DateTime day, DateTime focusedDay){
     setState(() {
+      if(day.weekday == holiday){
+      // pre = today;
+      return;
+      }
       today = day;
     });
   }
@@ -195,6 +182,45 @@ class _BookingScreenState extends State<BookingScreen> {
             colorScheme: ColorScheme.light(primary: Colors.purple),
           ),
           child: Stepper(
+            controlsBuilder: (context,ControlsDetails details) {
+              return Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: SizeConfig.screenWidth*0.4,
+                    child:
+                    TextButton(
+                      onPressed: details.onStepCancel,
+                      child: const Text('Previous',
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: kPrimaryColor,
+                      ),
+                    ),
+              ),
+                SizedBox(width: SizeConfig.screenWidth*0.075),
+                SizedBox(
+                  width: SizeConfig.screenWidth*0.4,
+                  child:
+                  TextButton(
+                    onPressed: details.onStepContinue,
+                    child: const Text('Next',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                    ),
+                  ),
+               ),
+                ],
+              );
+            },
             type: StepperType.horizontal,
             steps: getSteps(),
             currentStep: currentStep,
@@ -203,13 +229,14 @@ class _BookingScreenState extends State<BookingScreen> {
               if(isLastStep){
                 print('Completed');
                 // send data to server
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                    DoneBooking(widget.text,today,items[current],selectedService,priceTotal)));
               }
               else{
-                setState( () => currentStep += 1);
+                if(selectedService.isEmpty) { setState(() => currentStep = currentStep);
+                }else { setState(() => currentStep += 1); }
               }
-
             },
-            onStepTapped: (step) => setState( () => currentStep = step),
             onStepCancel:
                 currentStep == 0 ? null : () => setState(() => currentStep -= 1),
         ),
@@ -222,7 +249,7 @@ class _BookingScreenState extends State<BookingScreen> {
     required Category sec,
   }) => Container(
     width: double.infinity,
-    color: Colors.white,
+    color: Colors.grey.withOpacity(0.1),
     height: 200,
 
     child: Column(
@@ -255,9 +282,9 @@ class _BookingScreenState extends State<BookingScreen> {
     ),
   );
 
+
   Widget ServiceItem({required Servicee serv}){
     return ListTile(
-
       title: Text(
           serv.name,
           style: TextStyle(
@@ -278,11 +305,41 @@ class _BookingScreenState extends State<BookingScreen> {
             selectedService.removeWhere((element) =>
             element.id == serv.id);
           }
+          this.priceTotal=0;
+          for(int x = 0; x<selectedService.length; x++) {
+            this.priceTotal += int.parse(selectedService[x].price);
+            print(priceTotal);
+          }
           print(selectedService);
         });
       },
     );
   }
+
+  Widget ServiceItem2({required Servicee serv}){
+    return  Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(serv.name,
+            style:
+            TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: Colors.black.withOpacity(0.70)
+            )
+        ),
+        SizedBox(width: 16),
+        Text("₪${serv.price}",
+          style:
+          TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade900),
+        ),
+      ],
+    );
+  }
+
 
   List<Step> getSteps() =>[
     Step( state: currentStep > 1 ? StepState.complete : StepState.indexed,
@@ -344,16 +401,14 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
           SizedBox(height: 10),
           Container(
-            height:480,
-            color: Colors.grey.withOpacity(0.1),
+            height:400,
+            // color: Colors.grey.withOpacity(0.1),
             width: double.infinity,
             child: Column(
               children: [
-                SizedBox(height: 20),
                 Expanded(
                   child: Container(
                     child: ListView.separated(
-                      padding: EdgeInsets.only(left: 10,right: 10),
                       scrollDirection: Axis.vertical,
                       itemCount: cate.length,
                       separatorBuilder: (context, _) => SizedBox(height: 14),
@@ -364,13 +419,16 @@ class _BookingScreenState extends State<BookingScreen> {
               ],
             ),
           ),
+          SizedBox(height: 10),
         ],
       ),
     ),
     ),
     Step(state: currentStep > 1 ? StepState.complete : StepState.indexed,
-      isActive: currentStep >= 1,title: Text('Book a spot'), content: SingleChildScrollView(
-      child: Column(
+      isActive: currentStep >= 1,title: Text('Book a spot'),
+      content:
+     SingleChildScrollView(
+       child: Column(
         children: [
           Text("Select the appropriate day ", style: TextStyle(fontSize: 22,color: Colors.purple),),
           Container(
@@ -383,17 +441,68 @@ class _BookingScreenState extends State<BookingScreen> {
               firstDay: DateTime.now(),
               lastDay: DateTime.utc(2030,3,14),
               onDaySelected: _onDaySelected,
+              holidayPredicate: (day) {
+                return day.weekday == holiday;
+              },
+              calendarStyle: CalendarStyle(
+                holidayDecoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    shape: BoxShape.circle
+                ),
+                holidayTextStyle: TextStyle(
+                    color: Colors.white
+                ),
+                selectedDecoration: BoxDecoration(
+                    color: Colors.purpleAccent,
+                    shape: BoxShape.circle
+                ),
+                todayDecoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle
+                ),
+                todayTextStyle: TextStyle(
+                    color: Colors.black54
+                ),
+              ),
             ),
           ),
-          SizedBox(height: 15),
-          Text("Select the appropriate Time ",
+          Row(
+            children: [
+              SizedBox(width: SizeConfig.screenWidth * 0.2),
+              Text("● ",
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.redAccent)
+              ),
+              Text("Closed",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black
+                  )
+              ),
+              SizedBox(width: SizeConfig.screenWidth * 0.1),
+              Text("● ",
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.lime)
+              ),
+              Text("Full",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black
+                  )
+              ),
+            ],
+          ),
+          SizedBox(height: 5),
+          Text("Select the appropriate Time",
             style: TextStyle(
                 fontSize: 22,
                 color: Colors.purple)
           ),
-          SizedBox(height: 15),
+          SizedBox(height: 5),
           Container(
-            height: 70,
+            height: 60,
             width: double.infinity,
             child: Column(
               children: [
@@ -461,146 +570,177 @@ class _BookingScreenState extends State<BookingScreen> {
       ),
     ),
     ),
-    Step(isActive: currentStep >= 2,title: Text('Checkout'), content: SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 0,right: 0),
-            child: Container(
-
-              color: Colors.purple.withOpacity(0.04),
-              height: 550,
-              width: double.infinity,
-              child: Column(
-                children: [
-                  SizedBox(height: 7,),
-                  Text("Salon Name", style: TextStyle(fontSize: 26,
-                      fontWeight: FontWeight.bold, color: Colors.purple),),
-                  SizedBox(height: 8,),
-                  Text("THANK YOU FOR BOOKING OUR SERVICES!", style: TextStyle(fontSize: 17,
-                      fontWeight: FontWeight.bold,color: Colors.black.withOpacity(0.8)),),
-                  SizedBox(height: 8,),
-                  Text("BOOKING INFORMATION", style: TextStyle(fontSize: 14,
-                      fontWeight: FontWeight.w800),),
-                  SizedBox(height: 32,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 18.0),
-                    child: Row(
-                      children: [
-                        Icon(Icons.person),
-                        SizedBox(width: 16,),
-                        Text("User name ",style: TextStyle(fontSize: 17),)
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 18.0),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today),
-                        SizedBox(width: 16,),
-                        Text("Reservation Date :",style: TextStyle(fontSize: 17),),
-                        SizedBox(width: 16,),
-                        Text("17-5-2022",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.black),),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 18.0),
-                    child: Row(
-                      children: [
-                        Icon(Icons.timelapse),
-                        SizedBox(width: 16,),
-                        Text("Reservation Time :",style: TextStyle(fontSize: 17),),
-                        SizedBox(width: 16,),
-                        Text("10:00 PM",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.black),),
-
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 15,),
-                  Divider(
-                    color: Colors.black54,
-                    indent: 0,
-                    endIndent: 0,
-                  ),
-                  SizedBox(height: 10,),
-                  Text("SERVICES BOOKED",style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold,color: Colors.black),),
-                  SizedBox(height: 10,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40.0,right: 40),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Service name",style: TextStyle(fontSize: 17,fontWeight: FontWeight.w800,color: Colors.black.withOpacity(0.70)),),
-                        SizedBox(width: 16,),
-                        Text("#30",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.blue.shade900),),
-
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40.0,right: 40),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Service 2",style: TextStyle(fontSize: 17,fontWeight: FontWeight.w800,color: Colors.black.withOpacity(0.70)),),
-                        SizedBox(width: 16,),
-                        Text("#30",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.blue.shade900),),
-
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 40,),
-                  Divider(
-                    color: Colors.black54,
-                    indent: 0,
-                    endIndent: 0,
-                  ),
-                  SizedBox(height: 10,),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40.0,right: 40),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("TOTAL PRICE",style: TextStyle(fontSize: 22,color: Colors.black),),
-                        SizedBox(width: 16,),
-                        Text("#30",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold,color: Colors.blue.shade900),),
-
-                      ],
-                    ),
-                  ),
-
-
-
-
-
-                ],
-              ),
-
-
-
-            ),
-          ),
-          SizedBox(height: 10,),
-
-
-
-
-
-
-
-
-
-
-          //   value: SystemUiOverlayStyle.light,
-        ],
-      ),
-    ),),
-
+    Step(isActive: currentStep >= 2,title: Text('Checkout'),
+      content:
+          lastStep(widget.text,today,items[current],selectedService,priceTotal),
+    //   SingleChildScrollView(
+    //   child: Column(
+    //     children: [
+    //       Padding(
+    //         padding: const EdgeInsets.only(left: 0,right: 0),
+    //         child: Container(
+    //           color: Colors.purple.withOpacity(0.04),
+    //           height: 540,
+    //           width: double.infinity,
+    //           child: Column(
+    //             children: [
+    //               SizedBox(height: 5),
+    //               Text("Salon Name",
+    //                 style: TextStyle(
+    //                   fontSize: 26,
+    //                   fontWeight: FontWeight.bold,
+    //                   color: Colors.purple,
+    //
+    //               ),
+    //               ),
+    //               SizedBox(height: 5),
+    //               Text("Thank you for booking our services!",
+    //                 style: TextStyle(
+    //                     fontSize: 19,
+    //                     // fontWeight: FontWeight.bold,
+    //                     color: Colors.black.withOpacity(0.8)
+    //                 )
+    //               ),
+    //               SizedBox(height: 10),
+    //               Text("BOOKING INFORMATION",
+    //                 style: TextStyle(
+    //                   color: Colors.black,
+    //                     fontSize: 15,
+    //                     fontWeight: FontWeight.bold,
+    //                  ),
+    //               ),
+    //               SizedBox(height: 10),
+    //               Padding(
+    //                 padding: const EdgeInsets.only(left: 18.0),
+    //                 child: Row(
+    //                   children: [
+    //                     Icon(Icons.person),
+    //                     SizedBox(width: 16,),
+    //                     Text(user.name,style: TextStyle(fontSize: 17),)
+    //                   ],
+    //                 ),
+    //               ),
+    //               SizedBox(height: 10,),
+    //               Padding(
+    //                 padding: const EdgeInsets.only(left: 18.0),
+    //                 child: Row(
+    //                   children: [
+    //                     Icon(Icons.calendar_today),
+    //                     SizedBox(width: 16,),
+    //                     Text("Reservation Date :",
+    //                       style: TextStyle(fontSize: 17)
+    //                     ),
+    //                     SizedBox(width: 16),
+    //                     Text(today.toString().split(" ")[0],
+    //                       style: TextStyle(
+    //                           fontSize: 18,
+    //                           fontWeight: FontWeight.bold,
+    //                           color: Colors.black)
+    //                     ),
+    //                   ],
+    //                 ),
+    //               ),
+    //               SizedBox(height: 10,),
+    //               Padding(
+    //                 padding: const EdgeInsets.only(left: 18.0),
+    //                 child: Row(
+    //                   children: [
+    //                     Icon(Icons.timelapse),
+    //                     SizedBox(width: 16,),
+    //                     Text("Reservation Time :",style: TextStyle(fontSize: 17),),
+    //                     SizedBox(width: 16,),
+    //                     Text(items[current],style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.black),),
+    //
+    //                   ],
+    //                 ),
+    //               ),
+    //               SizedBox(height: 15),
+    //               Divider(
+    //                 color: Colors.black54,
+    //                 indent: 0,
+    //                 endIndent: 0,
+    //               ),
+    //               SizedBox(height: 10),
+    //               Text("SERVICES BOOKED",
+    //                 style: TextStyle(
+    //                 color: Colors.black,
+    //                 fontSize: 15,
+    //                 fontWeight: FontWeight.bold,
+    //                 ),
+    //               ),
+    //               SizedBox(height: 5),
+    //               selectedService.isEmpty ?
+    //                   SizedBox(height: 1,)
+    //               :Padding(
+    //                 padding: const EdgeInsets.only(left: 30.0,right: 30),
+    //                 child:
+    //                 Column(
+    //                   children: [
+    //                     ListView.builder(
+    //                       itemCount: selectedService.length,
+    //                       itemBuilder: (BuildContext context , int index)=>
+    //                           ServiceItem2(serv: selectedService[index]),
+    //                     ),
+    //                     // Row(
+    //                     //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                     //   children: [
+    //                     //     Text("Service name",
+    //                     //         style:
+    //                     //         TextStyle(
+    //                     //             fontSize: 17,
+    //                     //             fontWeight: FontWeight.w800,
+    //                     //             color: Colors.black.withOpacity(0.70)
+    //                     //         )
+    //                     //     ),
+    //                     //     SizedBox(width: 16),
+    //                     //     Text("₪30",
+    //                     //       style:
+    //                     //       TextStyle(
+    //                     //           fontSize: 18,
+    //                     //           fontWeight: FontWeight.bold,
+    //                     //           color: Colors.blue.shade900),
+    //                     //     ),
+    //                     //   ],
+    //                     // ),
+    //                   ],
+    //                 ),
+    //               ),
+    //               SizedBox(height: 10),
+    //               Divider(
+    //                 color: Colors.black54,
+    //                 indent: 0,
+    //                 endIndent: 0,
+    //               ),
+    //               SizedBox(height: 10),
+    //               Padding(
+    //                 padding: const EdgeInsets.only(left: 40.0,right: 40),
+    //                 child: Row(
+    //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                   children: [
+    //                     Text("TOTAL PRICE",
+    //                       style: TextStyle(
+    //                           fontSize: 22,
+    //                           color: Colors.black),
+    //                     ),
+    //                     SizedBox(width: 16),
+    //                     Text("₪30",
+    //                       style: TextStyle(
+    //                           fontSize: 26,
+    //                           fontWeight: FontWeight.bold,
+    //                           color: Colors.blue.shade900),
+    //                     ),
+    //                   ],
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //       SizedBox(height: 10),
+    //     ],
+    //   ),
+    // ),
+    ),
   ];
 }
 
@@ -610,15 +750,12 @@ class Servicee {
   final String category;
   final String id;
   bool isSelected;
-
-
   Servicee({
     required this.name,
     required this.price,
     required this.category,
     required this.id,
     required this.isSelected,
-
   });
   static Servicee fromJson(json) => Servicee(
     name: json['name'],
@@ -626,7 +763,6 @@ class Servicee {
     category: json['category'],
     id: json['_id'],
     isSelected: json['isSelected'],
-
   );
 }
 

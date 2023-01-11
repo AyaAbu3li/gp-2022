@@ -1,4 +1,3 @@
-// ignore: file_names
 class Offer {
    String name;
    String role;

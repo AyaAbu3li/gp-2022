@@ -16,7 +16,9 @@ class SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
-
+  _SignUpFormState(){
+    valueChoose= listItem[0];
+  }
   void save() async {
     try{
       var res = await http.post(Uri.parse("http://"+ip+":3000/users"),
@@ -29,7 +31,7 @@ class _SignUpFormState extends State<SignUpForm> {
           'password': user.password,
           'phone': user.phone,
           'picture': user.picture,
-          'city': user.city
+          'city': valueChoose
 
         });
       if(res.statusCode == 400){
@@ -83,8 +85,11 @@ class _SignUpFormState extends State<SignUpForm> {
   String pass ='';
   String namme ='';
   String phone ='';
+  String valueChoose = "Jenin";
   bool _isObscure = true;
-
+  final listItem = [
+    "Jenin", "Nablus" , "Ramallah", "Tullkarm", "Tubas", "Hebron", "Qalqelia"
+  ];
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -206,8 +211,39 @@ class _SignUpFormState extends State<SignUpForm> {
               labelStyle: TextStyle(color: Colors.black),
             ),
           ),
+          SizedBox(height: getProportionateScreenHeight(10)),
+          DropdownButtonFormField(
+            isExpanded: true,
+            hint: Text("Select City"),
+            icon: const Icon(
+              Icons.arrow_drop_down_circle,
+              color: Colors.purple,
+            ),
+            dropdownColor: Colors.deepPurple.shade50,
+            decoration: InputDecoration(
+              labelText: 'Select City',
+              labelStyle: TextStyle(color: Colors.black),
+              prefixIcon: Icon(
+                Icons.location_city_rounded,
+                color: Colors.purple,
+              ),
+            ),
+            value: valueChoose,
+            onChanged: (newValue) {
+              setState(() {
+                valueChoose = newValue as String;
+                user.city = valueChoose;
+              });
+            },
+            items: listItem.map((valueItem)=>
+                DropdownMenuItem(
+                  value: valueItem,
+                  child: Text(valueItem),
+                )
+            ).toList(),
+          ),
 
-          // SizedBox(height: getProportionateScreenHeight(10)),
+          SizedBox(height: getProportionateScreenHeight(10)),
           Row(
             children: [
               SvgPicture.asset(

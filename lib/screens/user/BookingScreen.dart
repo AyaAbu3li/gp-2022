@@ -36,7 +36,7 @@ class _BookingScreenState extends State<BookingScreen> {
   int holiday=2;
   List<String> days = ["",
     "monday", "tuesday" , "wednesday",
-    "thursday", "riday", "saturday", "sunday"
+    "thursday", "Friday", "saturday", "sunday"
   ];
 
 

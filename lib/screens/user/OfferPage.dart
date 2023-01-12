@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../../../constants.dart';
 import '../../../size_config.dart';
 import '../../../Model/Offer.dart';
+import 'BookingOfferScreen.dart';
 
 class OfferPage extends StatefulWidget {
   final String text;
@@ -50,8 +51,6 @@ class _OfferPageRequestState extends State<OfferPage> {
       circular = false;
     });
 
-  }
-  void Book() async {
   }
     @override
   Widget build(BuildContext context) {
@@ -151,7 +150,7 @@ class _OfferPageRequestState extends State<OfferPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
                   onPressed: () {
-                    Book();
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => BookingOfferScreen(offer.id)));
                   },
                   child: Text("Book Appointment",
                     style: TextStyle(

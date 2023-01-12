@@ -49,37 +49,6 @@ class _AllSalonPageState extends State<AllSalonPage> {
         automaticallyImplyLeading: false,
         title: const Text('All Salons'),
         centerTitle: true,
-        // actions: [
-        //   Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: Container(
-        //       width: (MediaQuery.of(context).size.width) * 0.45,
-        //       height: 50,
-        //       decoration: BoxDecoration(
-        //         color: Colors.white,
-        //         borderRadius: BorderRadius.circular(15),
-        //       ),
-        //       child: TextField(
-        //         onChanged:(value) {
-        //           // search code
-        //         },
-        //         decoration: InputDecoration(
-        //           enabledBorder: InputBorder.none,
-        //           focusedBorder: InputBorder.none,
-        //           hintText:
-        //           'Srarch',
-        //           prefixIcon: Icon(Icons.search,
-        //             color: Colors.purple,),
-        //           contentPadding: EdgeInsets.symmetric(
-        //             horizontal: 12,
-        //             vertical: 12,
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ],
-
       ),
       body:circular
           ? Center(child: CircularProgressIndicator())
@@ -100,7 +69,6 @@ class _AllSalonPageState extends State<AllSalonPage> {
         elevation: 40,
         child: GestureDetector(
           onTap: (){
-            print("Container clicked");
             Navigator.push(context, MaterialPageRoute(builder: (context) => SalonPage(saloon.id.toString())));
           },
           child: Container(

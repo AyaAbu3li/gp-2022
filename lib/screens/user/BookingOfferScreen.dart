@@ -1,14 +1,14 @@
-import 'package:purple/screens/user/lastStep.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../Model/salon.dart';
 import '../../../constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
+import '../../Model/Offer.dart';
 import '../../Model/user.dart';
 import '../../size_config.dart';
+import 'makeOfferBooking.dart';
 
 
 class BookingOfferScreen extends StatefulWidget {
@@ -22,19 +22,16 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
   int priceTotal=0;
   User user = User('','','','','','');
   Salon salon = Salon('','','','','','','','','','','','');
-  List<Servicee> serviceee = [];
-  List<Servicee> serviceee2 = [];
-
-  List<Servicee> serCate = [];
-  Map<String, Servicee> type = new HashMap();
-
+  late String salonEmail;
   bool circular = true;
   bool empty = false;
   int holiday=2;
   List<String> days = ["",
     "monday", "tuesday" , "wednesday",
-    "thursday", "riday", "saturday", "sunday"
+    "thursday", "friday", "saturday", "sunday"
   ];
+  Offer offer = Offer('','','','','','','','','');
+  List<Service> service = [];
 
 
 
@@ -58,23 +55,41 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
       user.phone = decoded['phone'].toString();
     });
 
-    var ress = await http.get(Uri.parse("http://"+ip+":3000/salons/"+widget.text),
+
+    var res2 = await http.get(Uri.parse("http://"+ip+":3000/offer/"+widget.text),
+      headers: <String, String>{
+        'Context-Type': 'application/json;charSet=UTF-8',
+      },
+    );
+    setState(() {
+      var decoded = json.decode(res2.body);
+      offer.picture = decoded['picture'];
+      offer.price = decoded['price'].toString();
+      offer.name = decoded['name'];
+      offer.Salon = decoded['salonname'];
+      offer.id = decoded['_id'];
+      this.salonEmail = decoded['salonEmail'];
+      offer.enddate = decoded['enddate'];
+      offer.startdate = decoded['startdate'];
+    });
+
+    var ress = await http.get(Uri.parse("http://"+ip+":3000/salonE/"+salonEmail),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
       },
     );
     setState(() {
       var decoded = json.decode(ress.body);
-      salon.name = decoded['name'];
-      salon.email = decoded['email'];
-      salon.picture = decoded['picture'];
-      salon.city = decoded['city'];
-      salon.phone = decoded['phone'].toString();
-      salon.closeTime = decoded['closeTime'];
-      salon.holiday = decoded['holiday'].toLowerCase();
-      salon.openTime = decoded['openTime'];
-      salon.address = decoded['address'];
-      salon.googlemaps = decoded['googlemaps'];
+      salon.name = decoded[0]['name'];
+      salon.email = decoded[0]['email'];
+      salon.picture = decoded[0]['picture'];
+      salon.city = decoded[0]['city'];
+      salon.phone = decoded[0]['phone'].toString();
+      salon.closeTime = decoded[0]['closeTime'];
+      salon.holiday = decoded[0]['holiday'].toLowerCase();
+      salon.openTime = decoded[0]['openTime'];
+      salon.address = decoded[0]['address'];
+      salon.googlemaps = decoded[0]['googlemaps'];
     });
 
     for(int x = 1; x<days.length; x++){
@@ -87,43 +102,19 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
       }
     }
 
-    var res3 = await http.get(Uri.parse("http://"+ip+":3000/category/"+salon.email),
-      headers: <String, String>{
-        'Context-Type': 'application/json;charSet=UTF-8',
-      },
-    );
-    var cat;
-    cat = json.decode(res3.body);
 
-    setState(() {
-      this.cate = cat.map<Category>(Category.fromJson).toList();
-    });
-
-    for (int x = 0; x < cate.length; x++) {
-      var res4 = await http.get(
-        Uri.parse("http://" + ip + ":3000/services/" + salon.email),
+    var res4 = await http.get(Uri.parse("http://"+ip+":3000/offerservices/"+offer.id),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8',
-        },
-      );
-      var ser = json.decode(res4.body);
-      setState(() {
-        this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
-        this.serviceee2 = ser.map<Servicee>(Servicee.fromJson).toList();
-      });
-      this.serCate = serviceee2;
-      serCate.removeWhere((data) => data.category != cate[x].category);
-
-      for (int j = 0; j < serCate.length; j++) {
-        _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
-      }
-    }
+        });
+    var data = json.decode(res4.body);
+    setState(() {
+      this.service = data.map<Service>(Service.fromJson).toList();
+      service.removeWhere((data) => data.owner != offer.id);
+    });
 
     circular = false;
   }
-  Map<Category,List<Servicee>> _map = Map();
-
-  List<Servicee> selectedService = [];
 
 
   int currentStep = 0;
@@ -166,7 +157,7 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if(selectedService.isNotEmpty) {
+        if(service.isNotEmpty) {
           final shouldPop = await showWarning(context);
           return shouldPop ?? false;
         }
@@ -234,10 +225,10 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
                 print('Completed');
                 // send data to server
                 Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                    DoneBooking(widget.text,today,items[current],selectedService,priceTotal)));
+                    DoneOfferBooking(salon.id,today,items[current],service,int.parse(offer.price))));
               }
               else{
-                if(selectedService.isEmpty) { setState(() => currentStep = currentStep);
+                if(service.isEmpty) { setState(() => currentStep = currentStep);
                 }else { setState(() => currentStep += 1); }
               }
             },
@@ -249,101 +240,55 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
     );
   }
 
-  Widget buildCard({
-    required Category sec,
-  }) => Container(
-    width: double.infinity,
-    color: Colors.grey.withOpacity(0.1),
-    height: 200,
 
-    child: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0,top: 10),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Text(
-              sec.category,
-              style:
-              TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87.withOpacity(0.5)),
+  Widget ServiceItem2({required Service serv}){
+    return
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5.0),
+            decoration: new BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
+              ),
+              color: Colors.white,
             ),
-          ),
-        ),
-
-        Expanded(
-          child: Container(
-            child: ListView.builder(
-              itemCount: _map[sec]!.length,
-              itemBuilder: (BuildContext context , int index)=>
-                  ServiceItem(serv: _map[sec]![index]),
+            // height: 35.0,
+            child:
+            Text(serv.name,
+                style:
+                TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black.withOpacity(0.70)
+                )
             ),
-          ),
-        ),
-      ],
-    ),
-  );
+          )
+        ],
+      );
+  }
 
-
-  Widget ServiceItem({required Servicee serv}){
+  Widget ServiceItem({required Service serv}){
     return ListTile(
+        tileColor: Colors.grey.withOpacity(0.1) ,
+       shape: RoundedRectangleBorder(
+           borderRadius:
+           BorderRadius.only(
+               topRight: Radius.circular(32),
+               bottomRight: Radius.circular(32)
+           )
+       ),
       title: Text(
-          serv.name,
-          style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 18)
-      ),
-      trailing: serv.isSelected
-
-          ? Icon(Icons.check_circle,color: Colors.purple)
-          : Icon(Icons.check_circle_outline_outlined,color: Colors.grey),
-      onTap: (){
-        setState(() {
-          serv.isSelected = !serv.isSelected;
-          if(serv.isSelected == true) {
-            selectedService.add(serv);
-          }
-          else if (serv.isSelected == false){
-            selectedService.removeWhere((element) =>
-            element.id == serv.id);
-          }
-          this.priceTotal=0;
-          for(int x = 0; x<selectedService.length; x++) {
-            this.priceTotal += int.parse(selectedService[x].price);
-            print(priceTotal);
-          }
-          print(selectedService);
-        });
-      },
-    );
-  }
-
-  Widget ServiceItem2({required Servicee serv}){
-    return  Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(serv.name,
-            style:
-            TextStyle(
-                fontSize: 17,
+            serv.name,
+            style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: Colors.black.withOpacity(0.70)
-            )
+                fontSize: 18)
         ),
-        SizedBox(width: 16),
-        Text("₪${serv.price}",
-          style:
-          TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue.shade900),
-        ),
-      ],
+      trailing: Icon(Icons.check_circle,color: Colors.purple),
+      onTap: (){},
     );
   }
-
 
   List<Step> getSteps() =>[
     Step( state: currentStep > 1 ? StepState.complete : StepState.indexed,
@@ -363,45 +308,7 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
                       fontWeight: FontWeight.bold),
                     textAlign: TextAlign.left)
               ),
-              Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 0.0),
-                    child: Text(
-                      "Select your needs",
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 19),
-                      textAlign: TextAlign.left),
-                  )
-              ),
             ],
-          ),
-          SizedBox(height: 10),
-          Container(
-            width: (MediaQuery.of(context).size.width) * 0.9,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.purple.shade300.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TextField(
-              onChanged:(value) {
-                // search code
-              },
-
-              decoration: InputDecoration(
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                hintText:
-                'Srarch Services',
-                prefixIcon: Icon(Icons.search),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-              ),
-            ),
           ),
           SizedBox(height: 10),
           Container(
@@ -414,9 +321,9 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
                   child: Container(
                     child: ListView.separated(
                       scrollDirection: Axis.vertical,
-                      itemCount: cate.length,
+                      itemCount: service.length,
                       separatorBuilder: (context, _) => SizedBox(height: 14),
-                      itemBuilder: (context,index) => buildCard(sec: cate[index]),
+                      itemBuilder: (context,index) => ServiceItem(serv: service[index]),
                     ),
                   ),
                 ),
@@ -576,7 +483,156 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
     ),
     Step(isActive: currentStep >= 2,title: Text('Checkout'),
       content:
-          lastStep(widget.text,today,items[current],selectedService,priceTotal),
+      SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 0, right: 0),
+              child: Container(
+                color: Colors.purple.withOpacity(0.04),
+                height: 540,
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    SizedBox(height: 5),
+                    Text(salon.name,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text("Thank you for booking our services!",
+                        style: TextStyle(
+                            fontSize: 19,
+                            // fontWeight: FontWeight.bold,
+                            color: Colors.black.withOpacity(0.8)
+                        )
+                    ),
+                    SizedBox(height: 10),
+                    Text("BOOKING INFORMATION",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 18.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.person),
+                          SizedBox(width: 16,),
+                          Text(user.name, style: TextStyle(fontSize: 17),)
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10,),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 18.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today),
+                          SizedBox(width: 16,),
+                          Text("Reservation Date :",
+                              style: TextStyle(fontSize: 17)
+                          ),
+                          SizedBox(width: 16),
+                          Text(today.toString().split(" ")[0],
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black)
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10,),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 18.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.timelapse),
+                          SizedBox(width: 16,),
+                          Text("Reservation Time :", style: TextStyle(
+                              fontSize: 17),),
+                          SizedBox(width: 16,),
+                          Text(items[current], style: TextStyle(fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),),
+
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Divider(
+                      color: Colors.black54,
+                      indent: 0,
+                      endIndent: 0,
+                    ),
+                    SizedBox(height: 10),
+                    Text("SERVICES BOOKED",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30),
+                      child:
+                      Column(
+                        children: [
+                          ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: service.length,
+                            itemBuilder: (BuildContext context, int index) =>
+                                ServiceItem2(serv: service[index]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Divider(
+                      color: Colors.black54,
+                      indent: 0,
+                      endIndent: 0,
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40.0, right: 40),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("TOTAL PRICE",
+                            style: TextStyle(
+                                fontSize: 22,
+                                color: Colors.black),
+                          ),
+                          SizedBox(width: 16),
+                          Text("₪${offer.price}",
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+
     ),
   ];
 }
@@ -615,27 +671,27 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
           ),
       );
 
-class Servicee {
+class Service {
   final String name;
-  final String price;
-  final String category;
   final String id;
-  bool isSelected;
-  Servicee({
+  final String owner;
+
+  const Service( {
     required this.name,
-    required this.price,
-    required this.category,
     required this.id,
-    required this.isSelected,
-  });
-  static Servicee fromJson(json) => Servicee(
-    name: json['name'],
-    price: json['price'].toString(),
-    category: json['category'],
+    required this.owner,
+
+  }  );
+
+
+  static Service fromJson(json) => Service(
+    name: json['service'],
     id: json['_id'],
-    isSelected: json['isSelected'],
+    owner: json['owner'],
+
   );
 }
+
 
 
 

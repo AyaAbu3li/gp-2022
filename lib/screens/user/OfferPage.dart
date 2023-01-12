@@ -109,7 +109,6 @@ class _OfferPageRequestState extends State<OfferPage> {
                     SizedBox(height: 10),
                     SizedBox(height: getProportionateScreenHeight(235),
                         child:
-                        // buildSalons(service)
                       Padding(
                           padding: const EdgeInsets.only(left: 30.0, right: 30),
                           child:

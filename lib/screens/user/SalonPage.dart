@@ -6,7 +6,6 @@ import 'package:purple/Model/Rating.dart';
 import 'package:purple/Model/category.dart';
 import '../../constants.dart';
 import 'BookingScreen.dart';
-import '../../Model/Serv.dart';
 import '../../../Model/salon.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
@@ -820,55 +819,3 @@ class Servicee {
     ),
   );
 
-
-class ItemListt extends StatelessWidget{
-  final List<Serv> c;
- const ItemListt(Key key ,  this.c) :super(key: key);
-  @override
-  Widget build(BuildContext context){
-    return Column(
-      children: c.map((e) => ItemCard(serv: e,)).toList(),
-    );
-  }
-}
-
-class ItemCard extends StatelessWidget {
-  final Serv serv;
-
-  const ItemCard( {Key? key,  required this.serv}) : super(key : key);
-  @override
-  Widget build(BuildContext context) {
-   return Card(
-       elevation: 2.0,
-       margin: const EdgeInsets.symmetric(
-       horizontal: 20.0,
-       vertical: 10.0,
-   ),
-     child: Row(
-     children: [
-        Container (
-         width: 100,
-          child: Text("hi"),
-        ) ,
-    ],
-
-     ),
-   );
-  }
-}
-
-
-class  Info {
-  final String name;
-  final String value;
-
-  const Info( {
-    required this.name,
-    required this.value,
-  }  );
-
-  static Info fromJson(json) => Info(
-    name: json['name'],
-    value: json['value'],
-  );
-}

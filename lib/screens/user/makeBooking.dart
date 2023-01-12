@@ -72,6 +72,7 @@ class _DoneBookingState extends State<DoneBooking> {
         var decoded = json.decode(ress.body);
         salon.name = decoded['name'];
         salon.email = decoded['email'];
+        salon.picture = decoded['picture'];
       });
       var resB = await http.post(Uri.parse("http://"+ip+":3000/booking"),
           headers: <String, String>{
@@ -83,7 +84,8 @@ class _DoneBookingState extends State<DoneBooking> {
             'SalonEmail': salon.email,
             'time': widget.time,
             'date': widget.today.toString().split(" ")[0],
-            'price': widget.priceTotal.toString()
+            'price': widget.priceTotal.toString(),
+            'SalonPic':salon.picture
           });
       var decoded = json.decode(resB.body);
 

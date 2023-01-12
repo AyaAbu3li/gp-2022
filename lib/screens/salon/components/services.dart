@@ -24,7 +24,6 @@ class _servicesState extends State<services> {
   List<Servicee> serviceee2 = [];
 
   List<Servicee> serCate = [];
-  Map<String, Servicee> type = new HashMap();
 
   bool circular = true;
   bool empty = false;
@@ -173,6 +172,8 @@ class _servicesState extends State<services> {
       ),
     );
   }
+
+
   Widget buildCard({
     required Category sec,
   }) => Container(

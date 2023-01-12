@@ -14,11 +14,13 @@ class Appointment extends StatefulWidget {
 }
 void deleteAppointment(id) async {
   try{
-    var res = await http.delete(Uri.parse("http://"+ip+":3000/booking/"+id),
+    var res = await http.patch(Uri.parse("http://"+ip+":3000/booking/"+id),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
       },
-    );
+        body: <String, String>{
+          'role': '11',
+        });
 
   } catch(e){
     print("hiiii delete");

@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:purple/components/default_button.dart';
 import '../../../../Model/salon.dart';
@@ -16,17 +17,57 @@ class SignUpSalonForm extends StatefulWidget {
 }
 
 class _SignUpSalonFormState extends State<SignUpSalonForm> {
-  XFile? image;
+  // XFile? image;
 
-  final ImagePicker picker = ImagePicker();
+  // final ImagePicker picker = ImagePicker();
 
   //we can upload image from camera or from gallery based on parameter
-  Future getImage(ImageSource media) async {
-    var img = await picker.pickImage(source: media);
+  // Future getImage(ImageSource media) async {
+  //   var img = await picker.pickImage(source: media);
+  //
+  //   setState(() {
+  //     image = img;
+  //   });
+  // }
 
-    setState(() {
-      image = img;
-    });
+
+  late TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+
+  late String long;
+  late String lat;
+
+  Future<Position> _getCurrentLocation() async {
+
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request');
+    }
+    return await Geolocator.getCurrentPosition();
   }
 
   //show popup dialog
@@ -58,7 +99,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
                     //if user click this button. user can upload image from camera
                     onPressed: () {
                       Navigator.pop(context);
-                      getImage(ImageSource.camera);
+                      // getImage(ImageSource.camera);
                     },
                     child: Row(
                       children: [
@@ -144,9 +185,6 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   TimeOfDay time2 = TimeOfDay(hour: 5, minute: 00);
 
 
-  _SignUpSalonFormState(){
-    valueChoose= listItem[0];
-  }
   String data ='';
   String errorPassImg ="assets/icons/white.svg";
   String errorImg ="assets/icons/white.svg";
@@ -178,11 +216,12 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
         child: Stack(
           clipBehavior: Clip.none, fit: StackFit.expand,
           children: [
-            image != null // هون كنت بجرب
-            ?CircleAvatar(
-                   backgroundImage: AssetImage("assets/images/Profile Image2.png"),
-                )
-            :CircleAvatar(
+            // image != null // هون كنت بجرب
+            // ?CircleAvatar(
+            //        backgroundImage: AssetImage("assets/images/Profile Image2.png"),
+            //     )
+            // :
+            CircleAvatar(
                backgroundImage: AssetImage("assets/images/Profile Image.png"),
               ),
             Positioned(
@@ -494,7 +533,8 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
 
           SizedBox(height: 20.0),
           TextFormField(
-              onChanged: (newValue) {
+            controller: controller,
+            onChanged: (newValue) {
                 salon.googlemaps = newValue;
               },
                 decoration: const InputDecoration(
@@ -509,9 +549,37 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
               labelStyle: TextStyle(color: Colors.black),
             ),
           ),
-          // Simple description of the salon
-          SizedBox(height: getProportionateScreenHeight(20)),
+          SizedBox(height: getProportionateScreenHeight(10)),
 
+          SizedBox(
+            width: SizeConfig.screenWidth*0.7 ,
+            height: getProportionateScreenHeight(46),
+            child:
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: kPrimaryColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              onPressed: () {
+                _getCurrentLocation().then((value) {
+                  lat = '${value.latitude}';
+                  long = '${value.longitude}';
+                });
+                print(lat);
+                String googleURL =
+                    'https://www.google.com/maps/search/?api=1&query=$lat,$long';
+                insert(googleURL);
+              },
+              child: Text('Get your current location',
+                style: TextStyle(
+                  fontSize: getProportionateScreenWidth(18),
+                  color: Colors.white,),
+
+              ),
+            ),
+          ),
+
+          SizedBox(height: getProportionateScreenHeight(20)),
           DefaultButton(
             text: "Continue",
             press: () {
@@ -531,7 +599,18 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
       ),
     );
   }
-
+  void insert(String content) {
+    var text = controller.text;
+    var pos = 0;
+    controller.value = TextEditingValue(
+      text: text.substring(0, pos) + content + text.substring(pos),
+      selection: TextSelection.collapsed(offset: pos + content.length),
+    );
+    setState(() {
+      salon.googlemaps = content ;
+        });
+    print(salon.googlemaps);
+  }
   TextFormField buildPasswordFormField() {
     return TextFormField(
       obscureText: _isObscure,
@@ -588,7 +667,6 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
       ),
     );
   }
-
   TextFormField buildEmailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,

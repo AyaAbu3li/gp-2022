@@ -291,27 +291,50 @@ class _AppointmentState extends State<Appointment> {
                   ),
                   SizedBox(height: 10),
 
-                  SizedBox(height: getProportionateScreenHeight(100),
-                    child:
+                  // SizedBox(height: getProportionateScreenHeight(100),
+                  //   child:
                     Padding(
                       padding: const EdgeInsets.only(left: 30.0, right: 30),
                       child:
-                      Column(
-                        children: [
-                          ListView.separated(
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemCount: _map_appoint[saloon]!.length,
-                            separatorBuilder: (context, _) =>
-                                SizedBox(height: 10),
-                            itemBuilder: (BuildContext context, int index) =>
-                                ServiceItem2(
-                                    serv: _map_appoint[saloon]![index]),
+
+                      Container(
+                        height:100,
+                        // color: Colors.grey.withOpacity(0.1),
+                        width: double.infinity,
+                        child:
+                        Column(
+                          children: [
+                          Expanded(
+                            child: Container(
+                              child:
+
+                              ListView.separated(
+                                scrollDirection: Axis.vertical,
+                                // shrinkWrap: true,
+                                itemCount: _map_appoint[saloon]!.length,
+                                separatorBuilder: (context, _) =>
+                                    SizedBox(height: 10),
+                                itemBuilder: (BuildContext context, int index) =>
+                                    ServiceItem2(
+                                        serv: _map_appoint[saloon]![index]),
+                              ),
+
+
+                            ),
                           ),
-                        ],
+
+
+                          ],
+                        ),
+
+
+
                       ),
+
                     ),
-                  ),
+
+
+                  // ),
 
                   Divider(
                     color: Colors.grey,
@@ -349,7 +372,6 @@ class _AppointmentState extends State<Appointment> {
                     indent: 0,
                     endIndent: 0,
                   ),
-                  SizedBox(height: 5),
                 Padding(
                 padding: const EdgeInsets.only(left: 20.0),
                   child:
@@ -493,7 +515,7 @@ class _AppointmentState extends State<Appointment> {
                                 )
                             ),
                           )
-                         :  saloon.role == 11 ?
+                              :  saloon.role == 11 ?
                           Container(
                             padding: const EdgeInsets.all(5.0),
                             decoration: new BoxDecoration(
@@ -511,7 +533,7 @@ class _AppointmentState extends State<Appointment> {
                                 )
                             ),
                           )
-                         :Container(
+                              :Container(
                             padding: const EdgeInsets.all(5.0),
                             decoration: new BoxDecoration(
                               borderRadius: BorderRadius.all(
@@ -533,6 +555,7 @@ class _AppointmentState extends State<Appointment> {
                     ],
                   ),
                   SizedBox(height: 10),
+
                   Padding(
                     padding: EdgeInsets.only(left: 16, right: 12),
                     child:
@@ -596,33 +619,41 @@ class _AppointmentState extends State<Appointment> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  SizedBox(height: getProportionateScreenHeight(100),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30.0, right: 30),
                     child:
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30.0, right: 30),
+                    Container(
+                      height:150,
+                      width: double.infinity,
                       child:
                       Column(
                         children: [
-                          ListView.separated(
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemCount: _map_history[saloon]!.length,
-                            separatorBuilder: (context, _) =>
-                                SizedBox(height: 10),
-                            itemBuilder: (BuildContext context, int index) =>
-                                ServiceItem2(
-                                    serv: _map_history[saloon]![index]),
+                          Expanded(
+                            child: Container(
+                              child:
+                              ListView.separated(
+                                scrollDirection: Axis.vertical,
+                                // shrinkWrap: true,
+                                itemCount: _map_history[saloon]!.length,
+                                separatorBuilder: (context, _) =>
+                                    SizedBox(height: 10),
+                                itemBuilder: (BuildContext context, int index) =>
+                                    ServiceItem2(
+                                        serv: _map_history[saloon]![index]),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
                   Divider(
                     color: Colors.grey,
                     indent: 0,
                     endIndent: 0,
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

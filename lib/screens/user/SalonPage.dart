@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:purple/Model/Rating.dart';
 import 'package:purple/Model/category.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../constants.dart';
 import 'BookingScreen.dart';
 import '../../../Model/salon.dart';
@@ -37,7 +39,11 @@ class _SalonPageState extends State<SalonPage> {
     super.initState();
     fetchData();
   }
-
+  Future<void> _openmap() async {
+    await canLaunchUrlString(salon.googlemaps)
+        ? await launchUrlString(salon.googlemaps)
+        : throw 'could not launch ${salon.googlemaps}';
+  }
     void fetchData() async {
     var data2;
     var cat;
@@ -294,7 +300,6 @@ class _SalonPageState extends State<SalonPage> {
                SizedBox(height: 25),
                Padding(
                  padding: const EdgeInsets.only(left: 20),
-
                  child: Row(
                    children: [
                      Icon(Icons.access_time_sharp,size: 26,color: Colors.purple.shade500),
@@ -389,8 +394,8 @@ class _SalonPageState extends State<SalonPage> {
                      SizedBox(width: getProportionateScreenWidth(55)),
                      ElevatedButton(
                        onPressed: (){
-                         // Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
-                       },
+                         launch("tel://"+salon.phone);
+                         },
                        child: Text("Call Now",
                          style: TextStyle(
                            fontSize: getProportionateScreenWidth(13),
@@ -416,7 +421,7 @@ class _SalonPageState extends State<SalonPage> {
                      SizedBox(width: 10),
                     ElevatedButton(
                      onPressed: (){
-                       // Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                       _openmap();
                      },
                      child: Text("View location in google maps",
                      style: TextStyle(

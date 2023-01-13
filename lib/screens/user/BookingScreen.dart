@@ -25,11 +25,13 @@ class _BookingScreenState extends State<BookingScreen> {
   User user = User('','','','','','');
   Salon salon = Salon('','','','','','','','','','','','');
   List<Category> cate = [];
+  List<Category> cateS = [];
+
   List<Servicee> serviceee = [];
   List<Servicee> serviceee2 = [];
+  final controller = TextEditingController() ;
 
   List<Servicee> serCate = [];
-  Map<String, Servicee> type = new HashMap();
 
   bool circular = true;
   bool empty = false;
@@ -100,6 +102,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     setState(() {
       this.cate = cat.map<Category>(Category.fromJson).toList();
+      this.cateS = cat.map<Category>(Category.fromJson).toList();
     });
 
     for (int x = 0; x < cate.length; x++) {
@@ -119,12 +122,15 @@ class _BookingScreenState extends State<BookingScreen> {
 
       for (int j = 0; j < serCate.length; j++) {
         _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+        _map2.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+
       }
     }
 
     circular = false;
   }
   Map<Category,List<Servicee>> _map = Map();
+  Map<Category,List<Servicee>> _map2 = Map();
 
   List<Servicee> selectedService = [];
 
@@ -279,9 +285,9 @@ class _BookingScreenState extends State<BookingScreen> {
         Expanded(
           child: Container(
             child: ListView.builder(
-              itemCount: _map[sec]!.length,
+              itemCount: _map2[sec]!.length,
               itemBuilder: (BuildContext context , int index)=>
-                  ServiceItem(serv: _map[sec]![index]),
+                  ServiceItem(serv: _map2[sec]![index]),
             ),
           ),
         ),
@@ -389,8 +395,10 @@ class _BookingScreenState extends State<BookingScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: TextField(
+              controller: controller,
               onChanged:(value) {
                 // search code
+                // filterSearchResults(value);
               },
 
               decoration: InputDecoration(
@@ -582,7 +590,38 @@ class _BookingScreenState extends State<BookingScreen> {
           lastStep(widget.text,today,items[current],selectedService,priceTotal),
     ),
   ];
+
+  // void filterSearchResults(String query) {
+  //   Map<Category,List<Servicee>> dummySearchList = Map();
+  //   dummySearchList.addAll(_map);
+  //   if(query.isNotEmpty) {
+  //     Map<Category,List<Servicee>> dummyListData = Map();
+  //     for (int x = 0; x < cate.length; x++) {
+  //
+  //       Map<Category,List<Servicee>> dummySearchList = Map();
+  //       dummySearchList.addAll(_map);
+  //       print(dummySearchList);
+  //
+  //       for (int j = 0; j < dummySearchList[x]!.length; j++) {
+  //         if(dummySearchList[x]![j].name.contains(query)){
+  //           dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+  //         }
+  //       }
+  //     }
+  //     setState(() {
+  //       _map2.clear();
+  //       _map2.addAll(dummyListData);
+  //     });
+  //     return;
+  //   } else {
+  //     setState(() {
+  //       _map2.clear();
+  //       _map2.addAll(_map);
+  //     });
+  //   }
+  // }
 }
+
 
   Future<bool?> showWarning(BuildContext context) async =>
       showDialog<bool>(

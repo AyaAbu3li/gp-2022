@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
+import '../../../size_config.dart';
 import 'salons_details.dart';
 import 'package:purple/screens/admin/admin_screen.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +13,9 @@ State<SalonsPage> createState() => _SalonsPageState();
 }
 class _SalonsPageState extends State<SalonsPage> {
   List<Saloon> saloon = [];
+  List<Saloon> saloonS = [];
+  final controller = TextEditingController() ;
+
   bool circular = true;
 
   @override
@@ -31,7 +35,8 @@ class _SalonsPageState extends State<SalonsPage> {
       setState(() {
         this.saloon = data.map<Saloon>(Saloon.fromJson).toList();
         saloon.removeWhere((data) => data.role == 4);
-
+        this.saloonS = data.map<Saloon>(Saloon.fromJson).toList();
+        saloonS.removeWhere((data) => data.role == 4);
         circular = false;
       });
     } catch(e){
@@ -45,59 +50,93 @@ Widget build(BuildContext context) {
     drawer: NavigationDrawer(),
     appBar: AppBar(
       title: const Text('All Salons'),
-      // actions: [
-      //   Padding(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: Container(
-      //       width: (MediaQuery.of(context).size.width) * 0.45,
-      //       height: 50,
-      //       decoration: BoxDecoration(
-      //         color: Colors.white,
-      //         borderRadius: BorderRadius.circular(15),
-      //       ),
-      //       child: TextField(
-      //         onChanged:(value) {
-      //           // search code
-      //         },
-      //         decoration: InputDecoration(
-      //           enabledBorder: InputBorder.none,
-      //           focusedBorder: InputBorder.none,
-      //           hintText:
-      //           'Srarch',
-      //           prefixIcon: Icon(Icons.search,
-      //             color: Colors.purple,),
-      //           contentPadding: EdgeInsets.symmetric(
-      //             horizontal: 12,
-      //             vertical: 12,
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //   ),
-      // ],
-
+      centerTitle: true,
     ),
     body:circular
         ? Center(child: CircularProgressIndicator())
-        : Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Container(
-        child: buildSalons(saloon),
-      ),
+        : Column(
+      children: [
+        SizedBox(height: getProportionateScreenWidth(10),),
+        Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: getProportionateScreenWidth(20)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: (MediaQuery.of(context).size.width) * 0.892,
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: TextField(
+                  controller: controller,
+                  onChanged:(value) {
+                    // search code
+                    filterSearchResults(value);
+                  },
+                  decoration: InputDecoration(
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    hintText: 'Srarch..',
+                    prefixIcon: Icon(Icons.search),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: getProportionateScreenWidth(20),
+                      vertical: getProportionateScreenWidth(9),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child:
+          Container(
+            child: buildSalons(saloonS),
+          ),
+        ),
+      ],
     ),
   );
 }
+  void filterSearchResults(String query) {
+    List<Saloon> dummySearchList = [];
+    dummySearchList.addAll(saloon);
+    if(query.isNotEmpty) {
+      List<Saloon> dummyListData = [];
+      dummySearchList.forEach((item) {
+        if(item.name.contains(query)) {
+          dummyListData.add(item);
+        }
+      });
+      setState(() {
+        saloonS.clear();
+        saloonS.addAll(dummyListData);
+      });
+      return;
+    } else {
+      setState(() {
+        saloonS.clear();
+        saloonS.addAll(saloon);
+      });
+    }
+  }
 
   Widget buildSalons(List<Saloon> saloons) => ListView.builder(
     itemCount: saloons.length,
+    scrollDirection: Axis.vertical,
+    shrinkWrap: true,
     itemBuilder: (context,index){
-      final saloon = saloons[index];
+      final salooon = saloons[index];
       return Card(
         elevation: 40,
         child: GestureDetector(
           onTap: (){
             print("Container clicked");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => salonsdetails(saloon.id.toString())));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => salonsdetails(salooon.id.toString())));
           },
           child: Container(
             height: 220,
@@ -107,11 +146,11 @@ Widget build(BuildContext context) {
               children: [
                 Padding(
                   padding: EdgeInsets.all(10),
-                  child: Image.asset(saloon.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                  child: Image.asset(salooon.picture, height: 130,width: 500,fit: BoxFit.cover,),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Text(saloon.name,style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black))
+                  child: Text(salooon.name,style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Colors.black))
                   ),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purple/size_config.dart';
+import '../../Model/user.dart';
 import '../../constants.dart';
 import 'AllOfferPage.dart';
 import 'AllSalonPage.dart';
@@ -24,6 +25,7 @@ class _HomeState extends State<Home> {
   bool circular = true;
   bool offerempty = false;
   bool offernum = false;
+  User user = User('','','','','','');
 
   bool salonempty = false;
   bool salonnum = false;
@@ -58,6 +60,17 @@ class _HomeState extends State<Home> {
           offernum = true;
         }
       });
+      var rees = await http.get(Uri.parse("http://"+ip+":3000/users/me"),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+          'Authorization': global.token
+        },
+      );
+      setState(() {
+        var decodedd = json.decode(rees.body);
+        user.name = decodedd['name'];
+        user.city = decodedd['city'];
+      });
     } catch(e){
       print("Alloffers");
       print(e);
@@ -73,9 +86,9 @@ class _HomeState extends State<Home> {
       );
       data = json.decode(res.body);
       setState(() {
-
+print(user.city);
         this.citySaloon = data.map<Salon>(Salon.fromJson).toList();
-        citySaloon.removeWhere((data) => data.city != global.city);
+        citySaloon.removeWhere((data) => data.city != user.city);
 
         this.saloon = data.map<Salon>(Salon.fromJson).toList();
         saloon.removeWhere((data) => data.role == 4);
@@ -100,88 +113,40 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text("Purple 💟 Hello ${user.name}"),
+          // centerTitle: true,
+          actions: <Widget>[
+            InkWell(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder:(context) => Notificat()) );
+              },
+              borderRadius: BorderRadius.circular(50),
+              child: Stack(
+                children: [
+                  Container(
+                    height: getProportionateScreenWidth(40),
+                    width: getProportionateScreenWidth(40),
+                    child:
+                    Icon(Icons.notification_important,
+                      size: 36,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]
+        // centerTitle: true,
+      ),
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: getProportionateScreenWidth(10),),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: getProportionateScreenWidth(20)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                      Container(
-                        width: (MediaQuery.of(context).size.width) * 0.7,
-                        //height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: TextField(
-                          onChanged:(value) {
-                            // search code
-                          },
-                          decoration: InputDecoration(
-                            enabledBorder: InputBorder.none,
-                           focusedBorder: InputBorder.none,
-                            hintText: 'Srarch..',
-                            prefixIcon: Icon(Icons.search),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: getProportionateScreenWidth(20),
-                              vertical: getProportionateScreenWidth(9),
-                            ),
-                          ),
-                        ),
-                      ),
-                    InkWell(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder:(context) => Notificat()) );
-                      },
-                      borderRadius: BorderRadius.circular(50),
-                      child: Stack(
-                        children: [
-                          Container(
-                            //   padding: EdgeInsets.all(getProportionateScreenWidth(1)),
-                            height: getProportionateScreenWidth(40),
-                            width: getProportionateScreenWidth(40),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child:   Icon(Icons.notification_important,size: 36,color: Colors.purple,),
-                          ),
-                        ],
-                      ),
-                    ),
-                     // InkWell(
-                     //   onTap: (){
-                     //    Navigator.push(context, MaterialPageRoute(builder:(context) => Appointment()) );
-                     //   },
-                     //   borderRadius: BorderRadius.circular(50),
-                     //   child: Stack(
-                     //     children: [
-                     //       Container(
-                     //     //   padding: EdgeInsets.all(getProportionateScreenWidth(1)),
-                     //         height: getProportionateScreenWidth(40),
-                     //         width: getProportionateScreenWidth(40),
-                     //         decoration: BoxDecoration(
-                     //           color: Colors.grey.withOpacity(0.1),
-                     //           shape: BoxShape.circle,
-                     //         ),
-                     //         child:  Icon(Icons.bookmark_added,size: 36,color: Colors.purple,),
-                     //       ),
-                     //     ],
-                     //   ),
-                     // ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
+              SizedBox(height: 5),
               Padding(
                 padding: EdgeInsets.only(left: 7,right: 16),
                 child: Text('Find and book best services',
@@ -189,15 +154,7 @@ class _HomeState extends State<Home> {
                   fontWeight: FontWeight.w500, color: Colors.black,
                   fontSize: 26),),
               ),
-
-              const SizedBox(height: 30),
-              
-              Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: getProportionateScreenWidth(20),
-                  ),
-              ),
-
+              SizedBox(height: 30),
               Column(
                 children: [
                   SectionTitle(

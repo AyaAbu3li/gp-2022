@@ -30,15 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: screens[index],
       backgroundColor: Colors.white,
-   /* appBar:  AppBar(
-      backgroundColor: Colors.white,
-      title: const Text(
-        "Home Page",
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold , color: Colors.purple),
-      ),
-      elevation: 0,
-    ), */
-
       bottomNavigationBar: Container(
        height: 64,
         decoration: BoxDecoration(

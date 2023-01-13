@@ -34,6 +34,7 @@ class _HomeState extends State<Home> {
   List<Salon> saloon = [];
   List<Salon> citySaloon = [];
 
+  late String city;
   @override
   void initState() {
     super.initState();
@@ -69,7 +70,7 @@ class _HomeState extends State<Home> {
       setState(() {
         var decodedd = json.decode(rees.body);
         user.name = decodedd['name'];
-        user.city = decodedd['city'];
+        this.city = decodedd['city'];
       });
     } catch(e){
       print("Alloffers");
@@ -86,9 +87,9 @@ class _HomeState extends State<Home> {
       );
       data = json.decode(res.body);
       setState(() {
-print(user.city);
+
         this.citySaloon = data.map<Salon>(Salon.fromJson).toList();
-        citySaloon.removeWhere((data) => data.city != user.city);
+        citySaloon.removeWhere((data) => data.city != global.city);
 
         this.saloon = data.map<Salon>(Salon.fromJson).toList();
         saloon.removeWhere((data) => data.role == 4);

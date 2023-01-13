@@ -110,7 +110,7 @@ class _AllSalonPageState extends State<AllSalonPage> {
     if(query.isNotEmpty) {
       List<Saloon> dummyListData = [];
       dummySearchList.forEach((item) {
-        if(item.name.contains(query)) {
+        if(item.name.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });

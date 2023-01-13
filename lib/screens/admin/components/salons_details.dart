@@ -5,6 +5,7 @@ import 'package:purple/Model/Serv.dart';
 import 'package:purple/Model/category.dart';
 import 'package:purple/screens/admin/components/salons_page.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:math';
 
 import '../../../Model/Rating.dart';
@@ -73,24 +74,12 @@ class _salonsdetailsState extends State<salonsdetails> {
     }
   }
 
-  // void fetchData() async {
-  //   var res = await http.get(Uri.parse("http://"+ip+":3000/salons/"+widget.text),
-  //     headers: <String, String>{
-  //       'Context-Type': 'application/json;charSet=UTF-8',
-  //     },
-  //   );
-  //   setState(() {
-  //     var decoded = json.decode(res.body);
-  //     salon.email = decoded['email'];
-  //     salon.name = decoded['name'];
-  //     salon.phone = decoded['phone'].toString();
-  //     salon.address = decoded['address'];
-  //     salon.city = decoded['city'];
-  //     salon.googlemaps = decoded['googlemaps'];
-  //     salon.picture = decoded['picture'];
-  //     circular = false;
-  //   });
-  // }
+  Future<void> _openmap() async {
+    await canLaunchUrlString(salon.googlemaps)
+        ? await launchUrlString(salon.googlemaps)
+        : throw 'could not launch ${salon.googlemaps}';
+  }
+
 
   void fetchData() async {
     var data2;
@@ -420,7 +409,7 @@ class _salonsdetailsState extends State<salonsdetails> {
                           SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: (){
-                              // Navigator.push(context, MaterialPageRoute(builder: (context) => services()));
+                              _openmap();
                             },
                             child: Text("View location in google maps",
                               style: TextStyle(

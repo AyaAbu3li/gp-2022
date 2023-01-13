@@ -22,8 +22,10 @@ class _servicesState extends State<services> {
   List<Category> cate = [];
   List<Servicee> serviceee = [];
   List<Servicee> serviceee2 = [];
+  Map<Category,List<Servicee>> _map2 = Map();
 
   List<Servicee> serCate = [];
+  List<Category> cateS = [];
 
   bool circular = true;
   bool empty = false;
@@ -32,6 +34,10 @@ class _servicesState extends State<services> {
   void initState() {
     super.initState();
     fetchData();
+    _map2.clear();
+    _map2.addAll(_map);
+    cateS.clear();
+    cateS.addAll(cate);
   }
 
   void fetchData() async {
@@ -75,6 +81,8 @@ class _servicesState extends State<services> {
 
           for (int j = 0; j < serCate.length; j++) {
             _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+            _map2.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+
           }
         }
       } else {
@@ -82,6 +90,10 @@ class _servicesState extends State<services> {
           empty = true;
         });
       }
+    _map2.clear();
+    _map2.addAll(_map);
+    cateS.clear();
+    cateS.addAll(cate);
     circular = false;
   }
   Map<Category,List<Servicee>> _map = Map();
@@ -118,6 +130,7 @@ class _servicesState extends State<services> {
                       child: TextField(
                         onChanged:(value) {
                           // search code
+                          filterSearchResults(value);
                         },
                         decoration: InputDecoration(
                           enabledBorder: InputBorder.none,
@@ -153,9 +166,9 @@ class _servicesState extends State<services> {
                       child: ListView.separated(
                         padding: EdgeInsets.only(left: 10,right: 10),
                         scrollDirection: Axis.vertical,
-                        itemCount: cate.length, // cate
+                        itemCount: cateS.length, // cate
                         separatorBuilder: (context, _) => SizedBox(height: 25),
-                        itemBuilder: (context,index) => buildCard(sec: cate[index]),
+                        itemBuilder: (context,index) => buildCard(sec: cateS[index]),
                       ),
                     ),
                   ),
@@ -173,6 +186,45 @@ class _servicesState extends State<services> {
     );
   }
 
+  void filterSearchResults(String query) {
+    Map<Category,List<Servicee>> dummySearchList = Map();
+    dummySearchList.addAll(_map);
+    List<Category> newCate = [];
+    if(query.isNotEmpty) {
+      Map<Category,List<Servicee>> dummyListData = Map();
+
+      for (int x = 0; x < cate.length; x++) {
+
+        Map<Category,List<Servicee>> dummySearchList = Map();
+        dummySearchList.addAll(_map);
+        bool happen = false;
+        for (int j = 0; j < dummySearchList[cate[x]]!.length; j++) {
+          if(dummySearchList[cate[x]]![j].name.toLowerCase().contains(query.toLowerCase())){
+            dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(dummySearchList[cate[x]]![j]);
+            happen = true;
+          }
+        }
+        if(happen){
+          newCate.add(cate[x]);
+        }
+      }
+      setState(() {
+        _map2.clear();
+        cateS.clear();
+        _map2.addAll(dummyListData);
+        cateS.addAll(newCate);
+      });
+      return;
+    } else {
+      setState(() {
+        _map2.clear();
+        cateS.clear();
+        _map2.addAll(_map);
+        cateS.addAll(cate);
+
+      });
+    }
+  }
 
   Widget buildCard({
     required Category sec,
@@ -201,9 +253,9 @@ class _servicesState extends State<services> {
        Expanded(
          child: Container(
           child: ListView.builder(
-          itemCount: _map[sec]!.length,
+          itemCount: _map2[sec]!.length,
           itemBuilder: (BuildContext context , int index)=>
-            ServiceItem(serv: _map[sec]![index]),
+            ServiceItem(serv: _map2[sec]![index]),
           ),
            ),
             ),

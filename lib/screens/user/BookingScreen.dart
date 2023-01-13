@@ -47,6 +47,10 @@ class _BookingScreenState extends State<BookingScreen> {
   void initState() {
     super.initState();
     fetchData();
+    _map2.clear();
+    _map2.addAll(_map);
+    cateS.clear();
+    cateS.addAll(cate);
   }
   void fetchData() async {
     var res = await http.get(Uri.parse("http://"+ip+":3000/users/me"),
@@ -86,7 +90,6 @@ class _BookingScreenState extends State<BookingScreen> {
       if(days[x]==salon.holiday){
         setState(() {
           holiday = x;
-          print(x);
         });
         break;
       }
@@ -123,9 +126,12 @@ class _BookingScreenState extends State<BookingScreen> {
       for (int j = 0; j < serCate.length; j++) {
         _map.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
         _map2.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
-
       }
     }
+    _map2.clear();
+    _map2.addAll(_map);
+    cateS.clear();
+    cateS.addAll(cate);
 
     circular = false;
   }
@@ -285,7 +291,7 @@ class _BookingScreenState extends State<BookingScreen> {
         Expanded(
           child: Container(
             child: ListView.builder(
-              itemCount: _map2[sec]!.length,
+              itemCount: _map2[sec]!.length, // _map2[cate[x]]!.length
               itemBuilder: (BuildContext context , int index)=>
                   ServiceItem(serv: _map2[sec]![index]),
             ),
@@ -321,9 +327,7 @@ class _BookingScreenState extends State<BookingScreen> {
           this.priceTotal=0;
           for(int x = 0; x<selectedService.length; x++) {
             this.priceTotal += int.parse(selectedService[x].price);
-            print(priceTotal);
           }
-          print(selectedService);
         });
       },
     );
@@ -425,9 +429,9 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: Container(
                     child: ListView.separated(
                       scrollDirection: Axis.vertical,
-                      itemCount: cate.length,
+                      itemCount: cateS.length,
                       separatorBuilder: (context, _) => SizedBox(height: 14),
-                      itemBuilder: (context,index) => buildCard(sec: cate[index]),
+                      itemBuilder: (context,index) => buildCard(sec: cateS[index]),
                     ),
                   ),
                 ),
@@ -594,6 +598,7 @@ class _BookingScreenState extends State<BookingScreen> {
   void filterSearchResults(String query) {
     Map<Category,List<Servicee>> dummySearchList = Map();
     dummySearchList.addAll(_map);
+    List<Category> newCate = [];
     if(query.isNotEmpty) {
       Map<Category,List<Servicee>> dummyListData = Map();
 
@@ -601,25 +606,31 @@ class _BookingScreenState extends State<BookingScreen> {
 
         Map<Category,List<Servicee>> dummySearchList = Map();
         dummySearchList.addAll(_map);
-        print(dummySearchList[cate[x]]!.length);
-
+        bool happen = false;
         for (int j = 0; j < dummySearchList[cate[x]]!.length; j++) {
-          if(dummySearchList[cate[x]]![j].name.contains(query)){
-            dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
-            print(dummySearchList);
-
+          if(dummySearchList[cate[x]]![j].name.toLowerCase().contains(query.toLowerCase())){
+            dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(dummySearchList[cate[x]]![j]);
+            happen = true;
           }
+        }
+        if(happen){
+          newCate.add(cate[x]);
         }
       }
       setState(() {
         _map2.clear();
+        cateS.clear();
         _map2.addAll(dummyListData);
+        cateS.addAll(newCate);
       });
       return;
     } else {
       setState(() {
         _map2.clear();
+        cateS.clear();
         _map2.addAll(_map);
+        cateS.addAll(cate);
+
       });
     }
   }

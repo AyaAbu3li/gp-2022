@@ -1,14 +1,19 @@
+import 'dart:io';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:purple/components/default_button.dart';
 import '../../../../Model/salon.dart';
 import '../../sign_in_screen.dart';
 import '../../../../constants.dart';
 import '../../../../size_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'dart:math';
 
 class SignUpSalonForm extends StatefulWidget {
 
@@ -17,19 +22,43 @@ class SignUpSalonForm extends StatefulWidget {
 }
 
 class _SignUpSalonFormState extends State<SignUpSalonForm> {
-  // XFile? image;
+  File? image;
 
-  // final ImagePicker picker = ImagePicker();
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
 
-  //we can upload image from camera or from gallery based on parameter
-  // Future getImage(ImageSource media) async {
-  //   var img = await picker.pickImage(source: media);
-  //
-  //   setState(() {
-  //     image = img;
-  //   });
-  // }
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
 
+      setState(() {
+        // this.image = img_temp;
+        this.image = img_temp;
+      });
+
+      // var basNameWithExtension = path.basename(img.path);
+
+      // final image_par = await saveImagePermanently(img.path);
+      final String path = 'assets/images';
+      // final String path = await getApplicationDocumentsDirectory().path;
+      // Directory directory = await getApplicationDocumentsDirectory();
+      // String path = directory.path;
+      // copy the file to a new path
+      String name = getRandomString(5);
+      final File newImage = await image!.copy('$path/$name.jpg');
+      if (newImage != null) {
+        salon.picture = newImage.path;
+      }
+
+
+    } on PlatformException catch (e) {
+          print('Failed to pick image: $e');
+    }
+  }
 
   late TextEditingController controller = TextEditingController();
 
@@ -70,10 +99,9 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
     return await Geolocator.getCurrentPosition();
   }
 
-  //show popup dialog
   void myAlert() {
     showDialog(
-        context: context,
+        context: this.context,
         builder: (BuildContext context) {
           return AlertDialog(
             shape:
@@ -84,27 +112,39 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
               child: Column(
                 children: [
                   ElevatedButton(
-                    //if user click this button, user can upload image from gallery
-                  onPressed: () =>  Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => SignInScreen())),
-
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
                     child: Row(
                       children: [
                         Icon(Icons.image),
-                        Text('From Gallery'),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
                     //if user click this button. user can upload image from camera
                     onPressed: () {
+                      pickImage(ImageSource.camera);
                       Navigator.pop(context);
-                      // getImage(ImageSource.camera);
                     },
                     child: Row(
                       children: [
                         Icon(Icons.camera),
-                        Text('From Camera'),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -142,7 +182,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
         return;
       }
       showDialog(
-        context: context,
+        context: this.context,
         builder: (context) =>
             AlertDialog(
               title: Text('Welcome'),
@@ -170,7 +210,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
     }
   }
 
-  Salon salon = Salon('','','','','','','','','','','','');
+  Salon salon = Salon('','','','','','','','','assets/images/Profile Image2.png','','','');
   String errorPhoneImg ="assets/icons/white.svg";
   String phone ='';
   String email="";
@@ -216,14 +256,20 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
         child: Stack(
           clipBehavior: Clip.none, fit: StackFit.expand,
           children: [
-            // image != null // هون كنت بجرب
-            // ?CircleAvatar(
-            //        backgroundImage: AssetImage("assets/images/Profile Image2.png"),
-            //     )
-            // :
+            image != null
+            ?
+            CircleAvatar(
+            backgroundImage: new FileImage(image!),
+            radius: 200.0)
+            // Image.file(image!,
+            // fit: BoxFit.cover,
+            // )
+            :
             CircleAvatar(
                backgroundImage: AssetImage("assets/images/Profile Image.png"),
               ),
+
+
             Positioned(
               right: -16,
               bottom: 0,
@@ -584,7 +630,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
             text: "Continue",
             press: () {
               if (_formKey.currentState!.validate()) {
-                salon.picture = 'assets/images/Profile Image2.png';
+                // salon.picture = 'assets/images/Profile Image2.png';
                 save();
               }
             }

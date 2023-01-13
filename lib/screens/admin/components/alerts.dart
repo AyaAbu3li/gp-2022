@@ -1,7 +1,15 @@
+//import 'dart:html';
 import 'package:flutter/material.dart';
+import 'package:purple/screens/user/Notificat.dart';
 import '../../../components/default_button.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:purple/screens/user/Notificat.dart';
+
+final userRef = FirebaseFirestore.instance.collection('users');
+final commentsRef = FirebaseFirestore.instance.collection('comments');
+final DateTime timestamp = DateTime.now();
 
 class alert extends StatefulWidget {
   const alert({Key? key}) : super(key: key);
@@ -10,11 +18,50 @@ class alert extends StatefulWidget {
 }
 
 class _alertState extends State<alert> {
+  TextEditingController commentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   Emp em = Emp('','');
 
   String errorNameImg ="assets/icons/white.svg";
   String namme ='';
+
+ @override
+
+ void initState(){
+  getUsers();
+ // createUser();
+
+  super.initState();
+ }
+
+ createUser() async{
+  userRef.add({
+   "username" : "Purple",
+  });
+ }
+
+getUsers(){
+  userRef.get().then((QuerySnapshot snapshot) {
+snapshot.docs.forEach((DocumentSnapshot doc) {
+  print(doc.data());
+});
+  });
+}
+
+addComment() {
+  commentsRef.add(
+    {
+     "username" : "Purple",
+     "comment": commentController.text,
+     "timestamp": timestamp,
+     "avatarUrl" : "assets/images/log.png",
+    }
+
+  );
+    commentController.clear();
+}
+
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -30,49 +77,15 @@ class _alertState extends State<alert> {
             child: Column(
             children: [
               SizedBox(height: SizeConfig.screenHeight * 0.02),
-              TextFormField(
-                onChanged: (value) {
-                  em.name = value;
-                },
-                validator: (Name) {
-                  if (Name == null || Name.isEmpty) {
-                    setState(() {
-                      errorNameImg = "assets/icons/Error.svg";
-                      namme = 'Please enter Alert details';
-                    });
-                    return "";
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(
-                    Icons.drive_file_rename_outline,
-                    color: Colors.purple ,
-                  ),
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
-                  labelText: 'Alert title',
-                  labelStyle: TextStyle(color: Colors.black),
-                ),
-              ),
-
+              
               SizedBox(height: SizeConfig.screenHeight * 0.02),
 
               TextFormField(
+                controller: commentController,
                 onChanged: (value) {
                   em.details = value;
                 },
-                validator: (Name) {
-                  if (Name == null || Name.isEmpty) {
-                    setState(() {
-                      errorNameImg = "assets/icons/Error.svg";
-                      namme = 'Please enter Alert details';
-                    });
-                    return "";
-                  }
-                  return null;
-                },
+              
                 decoration: const InputDecoration(
                   prefixIcon: Icon(
                     Icons.add_alert,
@@ -88,13 +101,14 @@ class _alertState extends State<alert> {
                 maxLines: null,
               ),
 
+
               SizedBox(height: SizeConfig.screenHeight * 0.03),
               DefaultButton(
                 text: "Send",
                 press: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Do what you want to do
-                  }
+                 addComment();
+                 print('add comment');
+                 //return Notificat();
                 },
               ),
               SizedBox(height: SizeConfig.screenHeight * 0.04),
@@ -105,6 +119,9 @@ class _alertState extends State<alert> {
       ),
     ),
   );
+
+
+
 }
 class Emp {
   String name;

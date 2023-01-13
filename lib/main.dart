@@ -4,7 +4,10 @@ import 'package:purple/routes.dart';
 import 'package:purple/theme.dart';
 
 void main() {
-  // runApp(MyApp());
+
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp();
+
   runApp(const MyApp());
 
 }

@@ -116,7 +116,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text("Purple 💟 Hello ${user.name}"),
+          title: Text("Purple 💟 Welcome ${user.name}"),
           // centerTitle: true,
           actions: <Widget>[
             InkWell(

@@ -398,7 +398,7 @@ class _BookingScreenState extends State<BookingScreen> {
               controller: controller,
               onChanged:(value) {
                 // search code
-                // filterSearchResults(value);
+                filterSearchResults(value);
               },
 
               decoration: InputDecoration(
@@ -591,35 +591,38 @@ class _BookingScreenState extends State<BookingScreen> {
     ),
   ];
 
-  // void filterSearchResults(String query) {
-  //   Map<Category,List<Servicee>> dummySearchList = Map();
-  //   dummySearchList.addAll(_map);
-  //   if(query.isNotEmpty) {
-  //     Map<Category,List<Servicee>> dummyListData = Map();
-  //     for (int x = 0; x < cate.length; x++) {
-  //
-  //       Map<Category,List<Servicee>> dummySearchList = Map();
-  //       dummySearchList.addAll(_map);
-  //       print(dummySearchList);
-  //
-  //       for (int j = 0; j < dummySearchList[x]!.length; j++) {
-  //         if(dummySearchList[x]![j].name.contains(query)){
-  //           dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
-  //         }
-  //       }
-  //     }
-  //     setState(() {
-  //       _map2.clear();
-  //       _map2.addAll(dummyListData);
-  //     });
-  //     return;
-  //   } else {
-  //     setState(() {
-  //       _map2.clear();
-  //       _map2.addAll(_map);
-  //     });
-  //   }
-  // }
+  void filterSearchResults(String query) {
+    Map<Category,List<Servicee>> dummySearchList = Map();
+    dummySearchList.addAll(_map);
+    if(query.isNotEmpty) {
+      Map<Category,List<Servicee>> dummyListData = Map();
+
+      for (int x = 0; x < cate.length; x++) {
+
+        Map<Category,List<Servicee>> dummySearchList = Map();
+        dummySearchList.addAll(_map);
+        print(dummySearchList[cate[x]]!.length);
+
+        for (int j = 0; j < dummySearchList[cate[x]]!.length; j++) {
+          if(dummySearchList[cate[x]]![j].name.contains(query)){
+            dummyListData.putIfAbsent(cate[x], () => <Servicee>[]).add(serCate[j]);
+            print(dummySearchList);
+
+          }
+        }
+      }
+      setState(() {
+        _map2.clear();
+        _map2.addAll(dummyListData);
+      });
+      return;
+    } else {
+      setState(() {
+        _map2.clear();
+        _map2.addAll(_map);
+      });
+    }
+  }
 }
 
 

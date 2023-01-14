@@ -18,7 +18,7 @@ final Map<String, WidgetBuilder> routes = {
   SignUpSalonScreen.routeName: (context) => SignUpSalonScreen(),
   ForgotPasswordScreen.routeName: (context) => ForgotPasswordScreen(),
   adminScreen.routeName: (context) => adminScreen(),
-  salonScreen.routeName: (context) => salonScreen(),
+  salonScreen.routeName: (context) => salonScreen(0),
   addAdmin.routeName: (context) => addAdmin(),
   changePassword.routeName: (context) => changePassword(),
 

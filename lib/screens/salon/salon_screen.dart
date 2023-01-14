@@ -10,16 +10,71 @@ import 'components/who_are_we.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
 
-class salonScreen extends StatelessWidget {
+class salonScreen extends StatefulWidget {
   static String routeName = "/salon_home";
+  final int page;
+  const salonScreen(this.page);
+  @override
+  State<salonScreen> createState() => _salonScreenState();
+}
+class _salonScreenState extends State<salonScreen> {
+  @override
+  void initState() {
+    super.initState();
+    index = widget.page;
+  }
+  int index = 0;
+  final screens = [
+    Body(),
+    Center(child: Text('Chats', style: TextStyle(fontSize: 72))),
+    account(),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home"),
+      body: screens[index],
+      bottomNavigationBar: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 15,
+              offset: Offset(0,5),
+            ),
+          ],
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24),
+              topRight: Radius.circular(24)),
+        ),
+
+
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            indicatorColor: Colors.blue.shade100,
+            labelTextStyle: MaterialStateProperty.all(TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          ),
+          child: NavigationBar(
+            height: 62,
+            backgroundColor: Colors.white,
+            selectedIndex: index,
+            onDestinationSelected: (index) =>
+                setState( () => this.index = index),
+            destinations: [
+              NavigationDestination(icon: Icon(Icons.home_outlined,color: Colors.black87,size: 35,),selectedIcon:
+              Icon(Icons.home,color: Colors.purple,size: 38,), label: 'Home'),
+
+              NavigationDestination(icon: Icon(Icons.message_outlined,color: Colors.black87,size: 35,),
+                  selectedIcon: Icon(Icons.message_sharp,color: Colors.purple,size: 38,), label: 'Chats'),
+
+              NavigationDestination(icon: Icon(Icons.person_outline,color: Colors.black87,size: 35,),selectedIcon:
+              Icon(Icons.person,color: Colors.purple,size: 38,), label: 'Account'),
+            ],
+          ),
+        ),
       ),
-      body: Body(),
-      drawer: NavigationDrawer(),
+
     );
   }
 }
@@ -119,7 +174,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
         ),
         onTap: () {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) =>  salonScreen(),
+            builder: (context) =>  salonScreen(0),
           )
                 );
         },

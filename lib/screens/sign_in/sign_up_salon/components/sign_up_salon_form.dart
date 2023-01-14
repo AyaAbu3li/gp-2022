@@ -43,16 +43,19 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
       // var basNameWithExtension = path.basename(img.path);
 
       // final image_par = await saveImagePermanently(img.path);
-      final String path = 'assets/images';
-      // final String path = await getApplicationDocumentsDirectory().path;
-      // Directory directory = await getApplicationDocumentsDirectory();
-      // String path = directory.path;
-      // copy the file to a new path
-      String name = getRandomString(5);
-      final File newImage = await image!.copy('$path/$name.jpg');
-      if (newImage != null) {
-        salon.picture = newImage.path;
+      // final String path = 'assets/images';
+      Directory pathd = await getApplicationDocumentsDirectory();
+      String path =pathd.path;
+      print("$path");
+      final image = this.image;
+      if (image != null) {
+        final File newImage = await image.copy('$path/name.jpg');
       }
+      String name = getRandomString(5);
+      // final File newImage = await image!.copy('$path/$name.jpg');
+      // if (newImage != null) {
+      //   salon.picture = newImage.path;
+      // }
 
 
     } on PlatformException catch (e) {

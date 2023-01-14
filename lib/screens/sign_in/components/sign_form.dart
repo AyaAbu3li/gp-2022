@@ -48,7 +48,7 @@ class _SignFormState extends State<SignForm> {
             context, MaterialPageRoute(builder: (context) => HomeScreen(0)));
       } else if(u['role'] == 1) { // saloon
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => salonScreen()));
+            context, MaterialPageRoute(builder: (context) => salonScreen(0)));
       } else if(u['role'] == 2) { // admin
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => adminScreen()));

@@ -84,7 +84,7 @@ class _OfferPageRequest2State extends State<Offer_Page2> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   onPressed: () =>  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => salonScreen())),
+                      context, MaterialPageRoute(builder: (context) => salonScreen(0))),
                 ),
               ],
             ),

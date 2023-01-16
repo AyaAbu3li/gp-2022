@@ -6,6 +6,11 @@ import '../../../constants.dart';
 import '../../../size_config.dart';
 import '../salon_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
 
 class employeepage extends StatefulWidget {
 
@@ -24,6 +29,78 @@ class _employeepageState extends State<employeepage> {
   String namme ='';
   String errorNameImg ="assets/icons/white.svg";
   Emp em = Emp('','','');
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
   @override
   void initState() {
@@ -44,7 +121,21 @@ class _employeepageState extends State<employeepage> {
     });
   }
   void edit() async {
-    try{
+
+      try{
+        if( image != null) {
+          final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+          CloudinaryResponse resImage = await cloudinary.uploadFile(
+            CloudinaryFile.fromFile(image!.path, folder: em.name),
+          );
+
+          setState(() {
+            imageUrl = resImage.secureUrl;
+            em.picture = imageUrl;
+          });
+        }
+
       var res = await http.patch(Uri.parse("http://"+ip+":3000/employee/"+widget.text),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
@@ -52,7 +143,7 @@ class _employeepageState extends State<employeepage> {
         body: <String, String>{
           'name': em.name,
           'job': em.job,
-          // 'picture': em.picture
+          'picture': em.picture
         });
     showDialog(
       context: context,
@@ -101,16 +192,20 @@ class _employeepageState extends State<employeepage> {
                 child: Column(
                 children: [
                   SizedBox( height: 20.0),
-                  // Row( children: [
                     SizedBox(
                       height: 115,
                       width: 115,
                       child: Stack(
                         clipBehavior: Clip.none, fit: StackFit.expand,
                         children: [
+                          image != null
+                              ?
                           CircleAvatar(
-                            backgroundImage: AssetImage(em.picture),
-                        // backgroundImage: AssetImage("assets/images/Profile Image.png"),
+                              backgroundImage: new FileImage(image!),
+                              radius: 200.0)
+                              :
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(em.picture),
                           ),
                           Positioned(
                             right: -16,
@@ -121,7 +216,7 @@ class _employeepageState extends State<employeepage> {
                               child: TextButton(
                                 child: Ink.image(image: AssetImage('assets/images/cam.png') ),
                                 onPressed: () {
-
+                                  myAlert();
                                 },
                                 style: TextButton.styleFrom(
                                   shape: RoundedRectangleBorder(

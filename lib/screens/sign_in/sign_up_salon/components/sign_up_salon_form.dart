@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:purple/components/default_button.dart';
 import '../../../../Model/salon.dart';
 import '../../sign_in_screen.dart';
@@ -12,8 +12,7 @@ import '../../../../constants.dart';
 import '../../../../size_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:path/path.dart' as path;
-import 'dart:math';
+import 'package:cloudinary_public/cloudinary_public.dart';
 
 class SignUpSalonForm extends StatefulWidget {
 
@@ -24,10 +23,6 @@ class SignUpSalonForm extends StatefulWidget {
 class _SignUpSalonFormState extends State<SignUpSalonForm> {
   File? image;
 
-  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
-  static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-  Random _rnd = Random();
 
   Future pickImage(ImageSource source) async {
     try {
@@ -36,27 +31,8 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
       final img_temp = File(img.path);
 
       setState(() {
-        // this.image = img_temp;
         this.image = img_temp;
       });
-
-      // var basNameWithExtension = path.basename(img.path);
-
-      // final image_par = await saveImagePermanently(img.path);
-      // final String path = 'assets/images';
-      Directory pathd = await getApplicationDocumentsDirectory();
-      String path =pathd.path;
-      print("$path");
-      final image = this.image;
-      if (image != null) {
-        final File newImage = await image.copy('$path/name.jpg');
-      }
-      String name = getRandomString(5);
-      // final File newImage = await image!.copy('$path/$name.jpg');
-      // if (newImage != null) {
-      //   salon.picture = newImage.path;
-      // }
-
 
     } on PlatformException catch (e) {
           print('Failed to pick image: $e');
@@ -68,7 +44,6 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -77,6 +52,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
     super.dispose();
   }
 
+  String imageUrl = '';
 
   late String long;
   late String lat;
@@ -159,7 +135,24 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   }
   final _formKey = GlobalKey<FormState>();
   void save() async {
+
     try{
+        if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: salon.name),
+        );
+
+        setState(() {
+          imageUrl = resImage.secureUrl;
+        });
+      }else {
+          setState(() {
+            imageUrl = "https://res.cloudinary.com/dsmn9brrg/image/upload/v1673876307/ye9zt5x791r1jjzajzvp.png";
+          });
+        }
+
       var res = await http.post(Uri.parse("http://"+ip+":3000/salons"),
           headers: <String, String>{
             'Context-Type': 'application/json;charSet=UTF-8'
@@ -172,7 +165,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
             'address': salon.address,
             'city': valueChoose,
             'googlemaps': salon.googlemaps,
-            'picture': salon.picture,
+            'picture': imageUrl,
             'holiday': valueChoose2,
             'openTime': salon.openTime,
             'closeTime': salon.closeTime,
@@ -225,7 +218,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
 
 
   TimeOfDay time = TimeOfDay(hour: 09, minute: 00);
-  TimeOfDay time2 = TimeOfDay(hour: 5, minute: 00);
+  TimeOfDay time2 = TimeOfDay(hour: 17, minute: 00);
 
 
   String data ='';
@@ -241,13 +234,18 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
   ];
   @override
   Widget build(BuildContext context) {
-    final hours = time.hour.toString().padLeft(2, '0');
-    final minutes = time.minute.toString().padLeft(2, '0');
+    DateTime tempDate1 = DateFormat("hh:mm").parse(
+        time.hour.toString().padLeft(2, '0') +
+            ":" + time.minute.toString().padLeft(2, '0'));
+    var dateFormat1 = DateFormat("hh:mm a"); // you can change the format here
 
-    final hours2 = time2.hour.toString().padLeft(2, '0');
-    final minutes2 = time2.minute.toString().padLeft(2, '0');
-    salon.closeTime = hours2+':'+minutes2;
-    salon.openTime = hours+':'+minutes;
+    DateTime tempDate = DateFormat("hh:mm").parse(
+        time2.hour.toString().padLeft(2, '0') +
+            ":" + time2.minute.toString().padLeft(2, '0'));
+    var dateFormat = DateFormat("hh:mm a"); // you can change the format here
+
+    salon.closeTime = dateFormat.format(tempDate);
+    salon.openTime = dateFormat1.format(tempDate1);
 
     return Form(
       key: _formKey,
@@ -262,17 +260,13 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
             image != null
             ?
             CircleAvatar(
-            backgroundImage: new FileImage(image!),
+                backgroundImage: new FileImage(image!),
+                // backgroundImage: NetworkImage(image!),
             radius: 200.0)
-            // Image.file(image!,
-            // fit: BoxFit.cover,
-            // )
             :
             CircleAvatar(
                backgroundImage: AssetImage("assets/images/Profile Image.png"),
               ),
-
-
             Positioned(
               right: -16,
               bottom: 0,
@@ -286,7 +280,6 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
                   ),
                   onPressed: () {
                     myAlert();
-
                   },
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -401,16 +394,14 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
                 color: Colors.black,
               ),
             ),
-          ],
-          ),
+          ]),
           SizedBox(height: SizeConfig.screenHeight * 0.01),
-
           Row(
             children: [
               Column(
                 children: [
                   Text(
-                    hours+':'+minutes,
+                    dateFormat1.format(tempDate1),
                     style: TextStyle(fontSize: 25),
                   ),
                   ElevatedButton(
@@ -456,7 +447,7 @@ class _SignUpSalonFormState extends State<SignUpSalonForm> {
               Column(
                 children: [
                   Text(
-                    hours2+':'+minutes2,
+                    dateFormat.format(tempDate),
                     style: TextStyle(fontSize: 25),
                   ),
                   ElevatedButton(

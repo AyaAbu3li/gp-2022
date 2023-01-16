@@ -47,37 +47,6 @@ class _NewSalonsPageState extends State<NewSalonsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Salons in '+global.city),
-        // actions: [
-        //   Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: Container(
-        //       width: (MediaQuery.of(context).size.width) * 0.45,
-        //       height: 50,
-        //       decoration: BoxDecoration(
-        //         color: Colors.white,
-        //         borderRadius: BorderRadius.circular(15),
-        //       ),
-        //       child: TextField(
-        //         onChanged:(value) {
-        //           // search code
-        //         },
-        //         decoration: InputDecoration(
-        //           enabledBorder: InputBorder.none,
-        //           focusedBorder: InputBorder.none,
-        //           hintText:
-        //           'Srarch',
-        //           prefixIcon: Icon(Icons.search,
-        //             color: Colors.purple,),
-        //           contentPadding: EdgeInsets.symmetric(
-        //             horizontal: 12,
-        //             vertical: 12,
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ],
-
       ),
       body:circular
           ? Center(child: CircularProgressIndicator())
@@ -103,13 +72,12 @@ class _NewSalonsPageState extends State<NewSalonsPage> {
           },
           child: Container(
             height: 220,
-            // color: Colors.purple.withOpacity(0.15),
             child:  Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
                   padding: EdgeInsets.all(10),
-                  child: Image.asset(saloon.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                  child: Image.network(saloon.picture, height: 130,width: 500,fit: BoxFit.cover,),
                 ),
                 Padding(
                     padding: const EdgeInsets.all(10),

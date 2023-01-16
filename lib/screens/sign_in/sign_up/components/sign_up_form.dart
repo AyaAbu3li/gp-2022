@@ -1,5 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:purple/components/default_button.dart';
 import '../../sign_in_screen.dart';
@@ -7,6 +8,10 @@ import 'package:http/http.dart' as http;
 import '../../../../constants.dart';
 import '../../../../size_config.dart';
 import 'package:purple/Model/user.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
 
 
 class SignUpForm extends StatefulWidget {
@@ -19,8 +24,99 @@ class _SignUpFormState extends State<SignUpForm> {
   _SignUpFormState(){
     valueChoose= listItem[0];
   }
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+
   void save() async {
     try{
+
+      if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: user.name),
+        );
+
+        setState(() {
+          imageUrl = resImage.secureUrl;
+          user.picture = imageUrl;
+        });
+      }else {
+        setState(() {
+          user.picture = "https://res.cloudinary.com/dsmn9brrg/image/upload/v1673876307/dngdfphruvhmu7cie95a.jpg";
+        });
+      }
       var res = await http.post(Uri.parse("http://"+ip+":3000/users"),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8'
@@ -102,6 +198,12 @@ class _SignUpFormState extends State<SignUpForm> {
             child: Stack(
               clipBehavior: Clip.none, fit: StackFit.expand,
               children: [
+                image != null
+                    ?
+                CircleAvatar(
+                    backgroundImage: new FileImage(image!),
+                    radius: 200.0)
+                    :
                 CircleAvatar(
                   backgroundImage: AssetImage("assets/images/Profile Image2.png"),
                 ),
@@ -117,7 +219,7 @@ class _SignUpFormState extends State<SignUpForm> {
                           ('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBxdgiNFnmCxkR1QUu8IKgGOZIMHlu6fbGZA&usqp=CAU'),
                       ),
                       onPressed: () {
-                        // myAlert();
+                        myAlert();
 
                       },
                       style: TextButton.styleFrom(
@@ -262,7 +364,6 @@ class _SignUpFormState extends State<SignUpForm> {
             text: "Continue",
             press: () {
               if (_formKey.currentState!.validate()) {
-                user.picture = 'assets/images/Profile Image.png';
                 save();
               }else { print("not oky");}
             },

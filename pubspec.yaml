@@ -53,6 +53,12 @@ dev_dependencies:
   table_calendar: ^3.0.8
   chatview:
 
+
+  file_picker: ^5.2.5 # add new
+  cloudinary_public: ^0.20.0 # add new
+
+
+
 flutter_icons:
   android: true
   ios: true

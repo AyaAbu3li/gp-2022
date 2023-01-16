@@ -167,7 +167,7 @@ class _salonsdetailsRequestState extends State<salonsdetailsRequest> {
                       padding:
                       EdgeInsets.all(0),
                       child:
-                      Image.asset( salon.picture,
+                      Image.network( salon.picture,
                         height: 200,width: 480,fit: BoxFit.cover,),
                     ),
                     SizedBox(height: 30),
@@ -176,9 +176,12 @@ class _salonsdetailsRequestState extends State<salonsdetailsRequest> {
                         Padding(
                           padding:
                           EdgeInsets.only(left: 16,right: 12),
-                          child:
-                          Image.asset( salon.picture,
-                              height: 180,width: 130,fit: BoxFit.fill),
+                          child: Image.network(
+                            salon.picture,
+                            height: 180,
+                            width: 130,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         Column(
                           children: [
@@ -264,7 +267,7 @@ class _salonsdetailsRequestState extends State<salonsdetailsRequest> {
                                   Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                          "${salon.openTime} AM - ${salon.closeTime} PM",
+                                          "${salon.openTime} - ${salon.closeTime}",
                                           style:TextStyle(
                                               color: Colors.black87,
                                               fontSize: 13,
@@ -373,6 +376,57 @@ class _salonsdetailsRequestState extends State<salonsdetailsRequest> {
                       endIndent: 0,
                     ),
                     SizedBox(height: 40),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: getProportionateScreenWidth(130),
+                          child:
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            onPressed: () {
+                              addSalon();
+                            },
+                            child: Text("Accept",
+                              style: TextStyle(
+                                fontSize: getProportionateScreenWidth(18),
+                                color: Colors.white,),
+
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: SizeConfig.screenWidth * 0.04),
+                        SizedBox(
+                          width: getProportionateScreenWidth(130),
+                          child:
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              // primary: Colors.purpleAccent, // foreground
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                            onPressed: () {
+                              deleteSalon();
+                            },
+                            child: Text("Reject",
+                              style: TextStyle(
+                                fontSize: getProportionateScreenWidth(18),
+                                color: Colors.white,),
+
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: SizeConfig.screenHeight * 0.05),
+
+
                   ],
                 ),
               ),

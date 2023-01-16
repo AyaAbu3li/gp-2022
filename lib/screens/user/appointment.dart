@@ -184,7 +184,7 @@ class _AppointmentState extends State<Appointment> {
                         padding:
                         EdgeInsets.only(left: 16, right: 12),
                         child:
-                        Image.asset(saloon.SalonPic,
+                        Image.network(saloon.SalonPic,
                             height: 100, width: 100, fit: BoxFit.fill),
                       ),
                       Column(
@@ -318,24 +318,12 @@ class _AppointmentState extends State<Appointment> {
                                     ServiceItem2(
                                         serv: _map_appoint[saloon]![index]),
                               ),
-
-
                             ),
                           ),
-
-
                           ],
                         ),
-
-
-
                       ),
-
                     ),
-
-
-                  // ),
-
                   Divider(
                     color: Colors.grey,
                     indent: 0,
@@ -477,7 +465,7 @@ class _AppointmentState extends State<Appointment> {
                         padding:
                         EdgeInsets.only(left: 16, right: 12),
                         child:
-                        Image.asset(saloon.SalonPic,
+                        Image.network(saloon.SalonPic,
                             height: 100, width: 100, fit: BoxFit.fill),
                       ),
                       Column(

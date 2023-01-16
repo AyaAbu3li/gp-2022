@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:purple/screens/admin/components/who_are_we.dart';
 import '../../../Model/Whoarewe.dart';
 import '../../../components/default_button.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
 
 class editWhoAreWe extends StatefulWidget {
 const editWhoAreWe({Key? key}) : super(key: key);
@@ -16,6 +21,78 @@ _editWhoAreWeState createState() => _editWhoAreWeState();
 class _editWhoAreWeState extends State<editWhoAreWe> {
   bool circular = true;
   Whoarewe whoarewe = Whoarewe('','','','','','');
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
   @override
   void initState() {
@@ -41,6 +118,19 @@ class _editWhoAreWeState extends State<editWhoAreWe> {
   }
   void edit() async {
     try{
+      if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: whoarewe.name),
+        );
+
+        setState(() {
+          imageUrl = resImage.secureUrl;
+          whoarewe.picture = imageUrl;
+        });
+      }
+
       var res = await http.patch(Uri.parse("http://"+ip+":3000/whoAreWe/63875089e605030b4d2f2476"),
           headers: <String, String>{
             'Context-Type': 'application/json;charSet=UTF-8',
@@ -49,7 +139,7 @@ class _editWhoAreWeState extends State<editWhoAreWe> {
             'phone': whoarewe.phone,
             'whoAreWe': whoarewe.whoAreWe,
             'WhatSetsUsApart': whoarewe.WhatSetsUsApart ,
-            // 'picture': user.picture
+            'picture': whoarewe.picture
           });
       showDialog(
         context: context,
@@ -94,7 +184,7 @@ child: SingleChildScrollView(
 child: Column(
 children: [
   Row( children: [
-    Image.asset(whoarewe.picture,width: 200,height: 160,),
+    Image.network(whoarewe.picture,width: 200,height: 160,),
     SizedBox( width: 20.0),
     TextButton(
       style: TextButton.styleFrom(
@@ -102,7 +192,7 @@ children: [
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       onPressed: () {
-
+        myAlert();
       },
       child: Text("Edit Image",
         style: TextStyle(

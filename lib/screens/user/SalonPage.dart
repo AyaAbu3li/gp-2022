@@ -197,7 +197,7 @@ class _SalonPageState extends State<SalonPage> {
                padding:
                EdgeInsets.all(0),
                child:
-               Image.asset( salon.picture,
+               Image.network( salon.picture,
                  height: 200,width: 480,fit: BoxFit.cover,),
              ),
              SizedBox(height: 30),
@@ -207,7 +207,7 @@ class _SalonPageState extends State<SalonPage> {
                    padding:
                    EdgeInsets.only(left: 16,right: 12),
                    child:
-                   Image.asset( salon.picture,
+                   Image.network( salon.picture,
                        height: 180,width: 130,fit: BoxFit.fill),
                  ),
                  Column(
@@ -322,7 +322,7 @@ class _SalonPageState extends State<SalonPage> {
                          Align(
                              alignment: Alignment.centerLeft,
                              child: Text(
-                               "${salon.openTime} AM - ${salon.closeTime} PM",
+                               "${salon.openTime} - ${salon.closeTime}",
                                style:TextStyle(
                                  color: Colors.black87,
                                  fontSize: 13,
@@ -769,7 +769,7 @@ class Servicee {
             aspectRatio: 4/3,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(60),
-              child: Image.asset(
+              child: Image.network(
                 employees.picture,
                 fit: BoxFit.cover,
               ),

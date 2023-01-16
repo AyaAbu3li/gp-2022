@@ -48,7 +48,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
       var decoded = json.decode(res.body);
       user.name = decoded['name'];
       user.email = decoded['email'];
-      // user.picture = decoded['picture'];
+      user.picture = decoded['picture'];
     });
   }
   @override
@@ -81,7 +81,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 children: [
                 CircleAvatar(
                 radius: 52,
-                  backgroundImage: AssetImage("assets/images/log.png"),
+                  backgroundImage: NetworkImage(user.picture),
             ),
               SizedBox(height: 12),
                Text(

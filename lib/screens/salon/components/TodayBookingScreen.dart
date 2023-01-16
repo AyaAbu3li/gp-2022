@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:purple/global.dart' as global;
+import 'package:purple/screens/salon/salon_screen.dart';
 import 'dart:convert';
 import '../../../constants.dart';
 import '../../../size_config.dart';
 import '../../../Model/salon.dart';
+import 'AppointmentPage.dart';
 
-class BookingScreen extends StatefulWidget {
-  const BookingScreen({Key? key}) : super(key: key);
+
+class TodayBookingScreen extends StatefulWidget {
+  const TodayBookingScreen({Key? key}) : super(key: key);
   @override
-  State<BookingScreen> createState() => _BookingScreenState();
+  State<TodayBookingScreen> createState() => _TodayBookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen>  {
+class _TodayBookingScreenState extends State<TodayBookingScreen>  {
   List<Booking> appoint = [];
   List<Booking> appoint2 = [];
   bool circular = true;
@@ -31,11 +33,41 @@ class _BookingScreenState extends State<BookingScreen>  {
   @override
   void initState() {
     super.initState();
-    fetchdata();
+    getAppointment();
   }
-  void getAppointment(DateTime day) async {
+  void getAppointment() async {
+
     var data;
     try {
+      var ress = await http.get(Uri.parse("http://"+ip+":3000/salon"),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+          'Authorization': global.token
+        },
+      );
+      setState(() {
+        var decoded = json.decode(ress.body);
+        salon.name = decoded['name'];
+        salon.email = decoded['email'];
+        salon.picture = decoded['picture'];
+        salon.city = decoded['city'];
+        salon.phone = decoded['phone'].toString();
+        salon.closeTime = decoded['closeTime'];
+        salon.holiday = decoded['holiday'].toLowerCase();
+        salon.openTime = decoded['openTime'];
+        salon.address = decoded['address'];
+        salon.googlemaps = decoded['googlemaps'];
+      });
+      for(int x = 1; x<days.length; x++){
+        if(days[x]==salon.holiday){
+          setState(() {
+            holiday = x;
+          });
+          break;
+        }
+      }
+
+
       var res = await http.get(Uri.parse("http://" + ip + ":3000/Allbooking"),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8',
@@ -46,11 +78,11 @@ class _BookingScreenState extends State<BookingScreen>  {
       setState(() {
         this.appoint = data.map<Booking>(Booking.fromJson).toList();
         appoint.removeWhere((data) =>
-        data.date.toString().split(" ")[0] != day.toString().split(" ")[0]);
+        data.date.toString().split(" ")[0] != DateTime.now().toString().split(" ")[0]);
 
         this.appoint2 = data.map<Booking>(Booking.fromJson).toList();
         appoint2.removeWhere((data) =>
-        data.date.toString().split(" ")[0] != day.toString().split(" ")[0]);
+        data.date.toString().split(" ")[0] != DateTime.now().toString().split(" ")[0]);
       });
 
       appoint.sort((a, b){
@@ -85,120 +117,41 @@ class _BookingScreenState extends State<BookingScreen>  {
         }
       }
 
+
+
+
+
       if (appoint.isNotEmpty) {
         circular = false;
       } else circular = true;
       circular2 = false;
 
       circulaMain = false;
-
     }catch (e) {
       print("get");
       print(e);
     }
     }
 
-    void fetchdata() async {
-    try {
-      var ress = await http.get(Uri.parse("http://"+ip+":3000/salon"),
-        headers: <String, String>{
-          'Context-Type': 'application/json;charSet=UTF-8',
-          'Authorization': global.token
-        },
-      );
-      setState(() {
-        var decoded = json.decode(ress.body);
-        salon.name = decoded['name'];
-        salon.email = decoded['email'];
-        salon.picture = decoded['picture'];
-        salon.city = decoded['city'];
-        salon.phone = decoded['phone'].toString();
-        salon.closeTime = decoded['closeTime'];
-        salon.holiday = decoded['holiday'].toLowerCase();
-        salon.openTime = decoded['openTime'];
-        salon.address = decoded['address'];
-        salon.googlemaps = decoded['googlemaps'];
-      });
-      for(int x = 1; x<days.length; x++){
-        if(days[x]==salon.holiday){
-          setState(() {
-            holiday = x;
-          });
-          break;
-        }
-      }
-      getAppointment(DateTime.now());
-
-    } catch (e) {
-      print("hiiii");
-      print(e);
-    }
-  }
   List<String> days = ["",
     "monday", "tuesday" , "wednesday",
     "thursday", "friday", "saturday", "sunday"
   ];
 
-  DateTime pre = DateTime.now();
-  DateTime today = DateTime.now();
-  void _onDaySelected(DateTime day, DateTime focusedDay){
-    appoint.clear();
-    _map_appoint.clear();
-    setState(() {
-      if(day.weekday == holiday){ return; }
-      today = day;
-      circular2 = true;
-    });
-    getAppointment(day);
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AGENDA'),
+        title: const Text('Todays Appointments'),
       ),
-      body: circulaMain
+      body:
+      circulaMain
         ? Center(child: CircularProgressIndicator())
         :
       SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              child: TableCalendar(
-                rowHeight: 45,
-                headerStyle: HeaderStyle(formatButtonVisible: false,titleCentered: true),
-                availableGestures: AvailableGestures.all,
-                selectedDayPredicate: (day) => isSameDay(day, today),
-                focusedDay: today,
-                firstDay: DateTime.utc(2020,3,14),
-                lastDay: DateTime.utc(2030,3,14),
-                onDaySelected: _onDaySelected,
-                holidayPredicate: (day) {
-                  return day.weekday == holiday;
-                },
-                calendarStyle: CalendarStyle(
-                  holidayDecoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle
-                  ),
-                  holidayTextStyle: TextStyle(
-                      color: Colors.white
-                  ),
-                  selectedDecoration: BoxDecoration(
-                      color: Colors.purpleAccent,
-                      shape: BoxShape.circle
-                  ),
-                  todayDecoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle
-                  ),
-                  todayTextStyle: TextStyle(
-                      color: Colors.black54
-                  ),
-                ),
-              ),
-            ),
-            SizedBox( height: 20),
+            SizedBox(height: 40),
             circular ?
             Center(child:
               Text("No Appointments on this day",
@@ -209,7 +162,7 @@ class _BookingScreenState extends State<BookingScreen>  {
            : Padding(
              padding: EdgeInsets.only(left: 20, right: 20),
               child:
-                  buildAppointment(appoint),
+                  Container(child: buildAppointment(appoint)),
            ),
         ],
         ),
@@ -256,66 +209,90 @@ class _BookingScreenState extends State<BookingScreen>  {
                                     ),
                                   )
                               ),
-
                               SizedBox(height: 10),
-                              saloon.role == 10 ? // not approved
-                              Container(
-                                padding: const EdgeInsets.all(5.0),
-                                decoration: new BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(12),
-                                  ),
-                                  color: Colors.redAccent, // red , green
-                                ),
-                                child:
-                                Text('NOT APPROVED',
-                                    style:
-                                    TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white
-                                    )
-                                ),
-                              )
+                              Row(
+                                children: [
+                                  saloon.role == 10 ? // not approved
+                                  Container(
+                                    padding: const EdgeInsets.all(5.0),
+                                    decoration: new BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      color: Colors.redAccent, // red , green
+                                    ),
+                                    child:
+                                    Text('NOT APPROVED',
+                                        style:
+                                        TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white
+                                        )
+                                    ),
+                                  )
                                   : saloon.role == 1 ?  //  approved
-                              Container(
-                                padding: const EdgeInsets.all(5.0),
-                                decoration: new BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(12),
-                                  ),
-                                  color: Colors.green, // red , green
-                                ),
-                                child:
-                                Text('APPROVED',
-                                    style:
-                                    TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white
-                                    )
-                                ),
-                              )
+                                  Container(
+                                    padding: const EdgeInsets.all(5.0),
+                                    decoration: new BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      color: Colors.green, // red , green
+                                    ),
+                                    child:
+                                    Text('APPROVED',
+                                        style:
+                                        TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white
+                                        )
+                                    ),
+                                  )
                                   : Container(
-                                padding: const EdgeInsets.all(5.0),
-                                decoration: new BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(12),
+                                    padding: const EdgeInsets.all(5.0),
+                                    decoration: new BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      color: Colors.orange, // red , green
+                                    ),
+                                    child:
+                                    Text('PENDING',
+                                        style:
+                                        TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white
+                                        )
+                                    ),
                                   ),
-                                  color: Colors.orange, // red , green
-                                ),
-                                child:
-                                Text('PENDING',
-                                    style:
-                                    TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white
-                                    )
-                                ),
-                              )
-                            ],
+                                  SizedBox(width: 15),
+                                  SizedBox(
+                                    width: getProportionateScreenWidth(50),
+                                    child:
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.purple,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20)),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(context,
+                                            MaterialPageRoute(builder: (context) =>
+                                                AppointmentPage(saloon.id)));
+                                      },
+                                      child: Text("Edit",
+                                        style: TextStyle(
+                                          color: Colors.white,),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                          ],
                           ),
                         ],
                       ),
-
                       SizedBox(height: 10),
                       Padding(
                         padding: EdgeInsets.only(left: 16, right: 12),

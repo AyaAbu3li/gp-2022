@@ -146,7 +146,9 @@ Widget build(BuildContext context) {
               children: [
                 Padding(
                   padding: EdgeInsets.all(10),
-                  child: Image.asset(salooon.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                  child:
+                  Image.network(salooon.picture,
+                    height: 130,width: 500,fit: BoxFit.cover,),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10),

@@ -8,8 +8,6 @@ import '../../../constants.dart';
 import '../../../size_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
-import '../salon_screen.dart';
-import 'employee_page.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'services.dart';
 
@@ -35,10 +33,84 @@ class _editServiceState extends State<editService> {
   String valueChoose = "MAKEUP";
   List<String> listItem = [];
   Emp em = Emp('','','');
+  List<Servicee> serviceee = [];
+
+
   @override
   void initState() {
     super.initState();
     getService();
+  }
+
+  void delete() async {
+
+    try{
+
+      var res45 = await http.get(Uri.parse("http://"+ip+":3000/salon"),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+          'Authorization': global.token
+        },
+      );
+      var decoded = json.decode(res45.body);
+      setState(() {
+        decoded = json.decode(res45.body);
+        salon.email = decoded['email'];
+      });
+
+      var res = await http.delete(Uri.parse("http://"+ip+":3000/services/"+widget.text),
+          headers: <String, String>{
+            'Context-Type': 'application/json;charSet=UTF-8',
+          });
+      var res4 = await http.get(
+        Uri.parse("http://" + ip + ":3000/services/" + salon.email),
+        headers: <String, String>{
+          'Context-Type': 'application/json;charSet=UTF-8',
+        },
+      );
+      var ser = json.decode(res4.body);
+      setState(() {
+        this.serviceee = ser.map<Servicee>(Servicee.fromJson).toList();
+        serviceee.removeWhere((data) => data.category != em.category);
+      });
+      if(serviceee.isEmpty){
+        var resss = await http.delete(Uri.parse("http://"+ip+":3000/category/"+
+            salon.email+"/"+em.category),
+            headers: <String, String>{
+              'Context-Type': 'application/json;charSet=UTF-8',
+            });
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              title: Text('Deleted'),
+              content: Text("Service has been successfully removed"),
+              actions: [
+                TextButton(
+                    child: Text('OK',
+                        style: TextStyle(
+                          fontSize: getProportionateScreenWidth(14),
+                          color: Colors.white,)),
+                    style: TextButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                    onPressed: () =>
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const services(),
+                        )
+                        )
+                  // Navigator.pop(context),
+                ),
+              ],
+            ),
+      );
+    } catch(e){
+      print(" delete");
+      print(e);
+    }
   }
   void edit() async {
 
@@ -83,41 +155,41 @@ class _editServiceState extends State<editService> {
       print(e);
     }
   }
-    void getService() async {
+  void getService() async {
+  var res3 = await http.get(Uri.parse("http://"+ip+":3000/Allcategory"),
+    headers: <String, String>{
+      'Context-Type': 'application/json;charSet=UTF-8',
+    },
+  );
+  var cat;
+  cat = json.decode(res3.body);
 
-    var res3 = await http.get(Uri.parse("http://"+ip+":3000/Allcategory"),
+  setState(() {
+    this.cate = cat.map<Category>(Category.fromJson).toList();
+  });
+  for (int x = 0; x < cate.length; x++) {
+    listItem.add(cate[x].category);
+  }
+  var data;
+  try{
+    var res = await http.get(Uri.parse("http://"+ip+":3000/service/"+widget.text),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
       },
     );
-    var cat;
-    cat = json.decode(res3.body);
-
+    data = json.decode(res.body);
     setState(() {
-      this.cate = cat.map<Category>(Category.fromJson).toList();
+      valueChoose = data['category'];
+      em.category = data['category'];
+      em.price = data['price'].toString();
+      em.name = data['name'];
+      circular = false;
     });
-    for (int x = 0; x < cate.length; x++) {
-      listItem.add(cate[x].category);
-    }
-    var data;
-    try{
-      var res = await http.get(Uri.parse("http://"+ip+":3000/service/"+widget.text),
-        headers: <String, String>{
-          'Context-Type': 'application/json;charSet=UTF-8',
-        },
-      );
-      data = json.decode(res.body);
-      setState(() {
-        valueChoose = data['category'];
-        em.price = data['price'].toString();
-        em.name = data['name'];
-        circular = false;
-      });
-    } catch(e){
-      print(" get service");
-      print(e);
-    }
+  } catch(e){
+    print(" get service");
+    print(e);
   }
+}
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -300,17 +372,7 @@ class _editServiceState extends State<editService> {
                       ),
                     ),
 
-                      SizedBox(height: SizeConfig.screenHeight * 0.3),
-                      DefaultButton(
-                        text: "Edit Service",
-                        press: () {
-                          if (_formKey.currentState!.validate()) {
-                            edit();
-                          }
-                        },
-                      ),
-
-                      SizedBox(height: SizeConfig.screenHeight * 0.02),
+                      SizedBox(height: SizeConfig.screenHeight * 0.1),
                       Row(
                         children: [
                           SvgPicture.asset(
@@ -322,6 +384,38 @@ class _editServiceState extends State<editService> {
                           Text(namme),
                         ],
                       ),
+                      SizedBox(height: SizeConfig.screenHeight * 0.05),
+
+                      DefaultButton(
+                        text: "Edit Service",
+                        press: () {
+                          if (_formKey.currentState!.validate()) {
+                            edit();
+                          }
+                        },
+                      ),
+                      SizedBox(height: SizeConfig.screenHeight * 0.02),
+                      SizedBox(
+                        width: double.infinity,
+                        height: getProportionateScreenHeight(56),
+                        child:
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          onPressed: () {
+                            delete();
+                          },
+                          child: Text('Delete Service',
+                            style: TextStyle(
+                              fontSize: getProportionateScreenWidth(18),
+                              color: Colors.white,),
+
+                          ),
+                        ),
+                      ),
+
                     ]),
                   ),
                 ),
@@ -330,65 +424,6 @@ class _editServiceState extends State<editService> {
     ),
   );
 }
-
-//   Widget buildCard({
-//     required Employee employees,
-//   }) => GestureDetector(
-//     onTap: (){
-//       Navigator.push(context, MaterialPageRoute(builder: (context) => employeepage(employees.id.toString())));
-//     },
-//     child: Container(
-//       width: 113,
-//       child: Column(
-//         children: [
-//           Expanded(
-//             child: AspectRatio(
-//               aspectRatio: 4/3,
-//               child: ClipRRect(
-//                 borderRadius: BorderRadius.circular(60),
-//                 child: Image.asset(
-//                   employees.picture,
-//                   fit: BoxFit.cover,
-//                 ),
-//               ),
-//             ),),
-//
-//           const SizedBox(height: 4,),
-//           Text(
-//             employees.name,
-//             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
-//           ),
-//           const SizedBox(height: 4),
-//           Text(
-//             employees.job,
-//             style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold),
-//           ),
-//         ],
-//       ),
-//     ),
-//   );
-// }
-// class Employee{
-//   final String picture;
-//   final String name;
-//   final String job;
-//   final String id;
-//
-//   const Employee({
-//     required this.picture,
-//     required this.name,
-//     required this.job,
-//     required this.id,
-//
-//   });
-//   static Employee fromJson(json) => Employee(
-//     name: json['name'],
-//     picture: json['picture'],
-//     job: json['job'],
-//     id: json['_id'],
-//
-//   );
-// }
 
 class Emp {
   String price;

@@ -117,7 +117,7 @@ class _Feed_backState extends State<Feed_back> {
       title: Text(fed.name),
       subtitle: Text(fed.message),
       leading: CircleAvatar(
-        backgroundImage: AssetImage(fed.picture),
+        backgroundImage: NetworkImage(fed.picture),
         radius: 30,
       ),
     onTap: (){

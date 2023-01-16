@@ -4,7 +4,7 @@ import '../../Model/user.dart';
 import '../../constants.dart';
 import '../sign_in/sign_in_screen.dart';
 import 'components/account.dart';
-import 'components/alerts.dart';
+import 'components/AppointmentPage.dart';
 import 'components/body.dart';
 import 'components/who_are_we.dart';
 import 'package:http/http.dart' as http;
@@ -195,20 +195,6 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const account(),
-        )
-        );
-      },
-      ),
-      ListTile(
-      leading: Icon(Icons.notification_add, color: Colors.purple),
-      title: const Text('Send Notifications',
-        style: TextStyle(
-          fontSize: 16,
-        ),
-      ),
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const alert(),
         )
         );
       },

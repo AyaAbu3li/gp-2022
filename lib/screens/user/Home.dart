@@ -3,7 +3,6 @@ import 'package:purple/size_config.dart';
 import '../../Model/user.dart';
 import '../../constants.dart';
 import 'AllOfferPage.dart';
-import 'AllSalonPage.dart';
 import 'HomeScreen.dart';
 import 'Notificat.dart';
 import 'OfferPage.dart';
@@ -54,6 +53,8 @@ class _HomeState extends State<Home> {
       setState(() {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 0);
+        offer.removeWhere((data) => data.enddate == DateTime.now().toString().split(" ")[0]);
+
         if(offer.isEmpty){
            offerempty = true;
         }
@@ -89,6 +90,7 @@ class _HomeState extends State<Home> {
       setState(() {
 
         this.citySaloon = data.map<Salon>(Salon.fromJson).toList();
+        citySaloon.removeWhere((data) => data.role == 4);
         citySaloon.removeWhere((data) => data.city != global.city);
 
         this.saloon = data.map<Salon>(Salon.fromJson).toList();
@@ -374,7 +376,7 @@ class SpesialOfferCard extends StatelessWidget{
            borderRadius: BorderRadius.circular(30),
            child:Stack(
              children: [
-               Image.asset(picture, fit:BoxFit.cover,),
+               Image.network(picture, fit:BoxFit.cover,),
                Container(
                  decoration: BoxDecoration(
                    gradient: LinearGradient(
@@ -467,7 +469,7 @@ class SalonCard extends StatelessWidget{
                     color: Colors.grey.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Image.asset(salon.picture,fit: BoxFit.cover,),
+                  child: Image.network(salon.picture,fit: BoxFit.cover,),
                 ),
               ),
             ),

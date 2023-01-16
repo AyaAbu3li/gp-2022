@@ -35,29 +35,6 @@ class _offerRequestsState extends State<offerRequests> {
         offer.removeWhere((data) => data.role == 1);
         if(offer.isEmpty){
            empty = true;
-
-          // showDialog(
-          //   context: context,
-          //   builder: (context) =>
-          //       AlertDialog(
-          //         title: Text('come back later'),
-          //         content: Text("There are no offer requests at the moment"),
-          //         actions: [
-          //           TextButton(
-          //             child: Text('OK',
-          //                 style: TextStyle(
-          //                   fontSize: getProportionateScreenWidth(14),
-          //                   color: Colors.white,)),
-          //             style: TextButton.styleFrom(
-          //               backgroundColor: kPrimaryColor,
-          //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          //             ),
-          //             onPressed: () =>  Navigator.push(
-          //                 context, MaterialPageRoute(builder: (context) => adminScreen())),
-          //           ),
-          //         ],
-          //       ),
-          // );
         }
         circular = false;
       });
@@ -110,7 +87,7 @@ class _offerRequestsState extends State<offerRequests> {
                   Padding(
                     padding: EdgeInsets.all(10),
                     child:
-                    Image.asset(offerr.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                    Image.network(offerr.picture, height: 130,width: 500,fit: BoxFit.cover,),
                   ),
                   Text(offerr.Salon,style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold)),
                   Text(offerr.name,style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),

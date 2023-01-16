@@ -7,7 +7,10 @@ import '../../../constants.dart';
 import '../../../size_config.dart';
 import '../admin_screen.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:flutter/services.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class addAdmin extends StatefulWidget {
   static String routeName = "/add_admin";
@@ -17,9 +20,97 @@ class addAdmin extends StatefulWidget {
 
 class _addAdminState extends State<addAdmin> {
   final _formKey = GlobalKey<FormState>();
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
   void save() async {
     try{
+      if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: user.name),
+        );
+
+        setState(() {
+          user.picture = resImage.secureUrl;
+        });
+      }else {
+        setState(() {
+          user.picture = "https://res.cloudinary.com/dsmn9brrg/image/upload/v1673876307/dngdfphruvhmu7cie95a.jpg";
+        });
+      }
+
       var res = await http.post(Uri.parse("http://"+ip+":3000/users"),
           headers: <String, String>{
             'Context-Type': 'application/json;charSet=UTF-8'

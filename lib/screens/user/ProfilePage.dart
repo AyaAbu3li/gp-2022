@@ -78,7 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
               clipBehavior: Clip.none,
               children: [
                 CircleAvatar(
-                  backgroundImage: AssetImage(user.picture),
+                  backgroundImage: NetworkImage(user.picture),
                 ),
               ],
             ),

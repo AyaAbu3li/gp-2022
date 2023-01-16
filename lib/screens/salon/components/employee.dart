@@ -8,6 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:purple/global.dart' as global;
 import '../salon_screen.dart';
 import 'employee_page.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
 
 
 class employee extends StatefulWidget {
@@ -23,6 +28,79 @@ class _employeeState extends State<employee> {
   bool circular = true;
   String errorNameImg ="assets/icons/white.svg";
   String namme ='';
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
   Emp em = Emp('','','');
   @override
@@ -58,6 +136,24 @@ class _employeeState extends State<employee> {
   }
   void add() async {
     try{
+
+      if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: em.name),
+        );
+
+        setState(() {
+          imageUrl = resImage.secureUrl;
+          em.picture = imageUrl;
+        });
+      }else {
+        setState(() {
+          em.picture = "https://res.cloudinary.com/dsmn9brrg/image/upload/v1673876307/dngdfphruvhmu7cie95a.jpg";
+        });
+      }
+
       var res = await http.post(Uri.parse("http://"+ip+":3000/employee"),
           headers: <String, String>{
             'Context-Type': 'application/json;charSet=UTF-8',
@@ -137,8 +233,14 @@ class _employeeState extends State<employee> {
                         child: Stack(
                           clipBehavior: Clip.none, fit: StackFit.expand,
                           children: [
+                            image != null
+                                ?
                             CircleAvatar(
-                              backgroundImage: AssetImage('assets/images/cam.png'),
+                                backgroundImage: new FileImage(image!),
+                                radius: 200.0)
+                                :
+                            CircleAvatar(
+                              backgroundImage: AssetImage('assets/images/Profile Image2.png'),
                             ),
                             Positioned(
                               right: -16,
@@ -150,7 +252,7 @@ class _employeeState extends State<employee> {
                                   child: Ink.image(image: AssetImage('assets/images/cam.png')
                                   ),
                                   onPressed: () {
-
+                                    myAlert();
                                   },
                                   style: TextButton.styleFrom(
                                     shape: RoundedRectangleBorder(

@@ -44,6 +44,7 @@ class _BookingScreenState extends State<BookingScreen> {
   void initState() {
     super.initState();
     fetchData();
+
     _map2.clear();
     _map2.addAll(_map);
     cateS.clear();

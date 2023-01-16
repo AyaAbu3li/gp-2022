@@ -39,7 +39,7 @@ class _DoneOfferBookingState extends State<DoneOfferBooking> {
       '',
       '');
   bool circular = true;
-  Booking booking = Booking('','','','','','','','','');
+  Booking booking = Booking('','','',0,'','','','','','');
   @override
   void initState() {
     super.initState();

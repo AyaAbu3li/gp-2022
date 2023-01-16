@@ -1,6 +1,6 @@
 class Booking {
    String PersonName;
-   String role;
+   int role;
    String price;
    String phoneNumber;
    String id;
@@ -8,6 +8,7 @@ class Booking {
    String SalonEmail;
    String date;
    String time;
+   String owner;
 
    Booking(
      this.PersonName,
@@ -16,9 +17,10 @@ class Booking {
      this.role,
      this.id,
      this.SalonName,
-    this.date,
-       this.SalonEmail,
+     this.date,
+     this.SalonEmail,
        this.time,
+       this.owner,
   );
 
 }

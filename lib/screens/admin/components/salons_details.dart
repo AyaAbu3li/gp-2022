@@ -7,7 +7,6 @@ import 'package:purple/screens/admin/components/salons_page.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'dart:math';
-
 import '../../../Model/Rating.dart';
 import '../../../Model/salon.dart';
 import '../../../constants.dart';
@@ -217,7 +216,7 @@ class _salonsdetailsState extends State<salonsdetails> {
                 padding:
                 EdgeInsets.all(0),
                 child:
-                Image.asset( salon.picture,
+                Image.network( salon.picture,
                   height: 200,width: 480,fit: BoxFit.cover,),
               ),
               SizedBox(height: 30),
@@ -227,7 +226,8 @@ class _salonsdetailsState extends State<salonsdetails> {
                     padding:
                     EdgeInsets.only(left: 16,right: 12),
                     child:
-                    Image.asset( salon.picture,
+                    Image.network(
+                        salon.picture,
                         height: 180,width: 130,fit: BoxFit.fill),
                   ),
                   Column(
@@ -326,7 +326,7 @@ class _salonsdetailsState extends State<salonsdetails> {
                             Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                    "${salon.openTime} AM - ${salon.closeTime} PM",
+                                    "${salon.openTime} - ${salon.closeTime}",
                                     style:TextStyle(
                                         color: Colors.black87,
                                         fontSize: 13,
@@ -584,6 +584,7 @@ class _salonsdetailsState extends State<salonsdetails> {
                 ],
               ),
               SizedBox(height: 40),
+
             ],
           ),
         ),

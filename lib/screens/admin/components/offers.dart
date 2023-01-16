@@ -33,6 +33,8 @@ class _offersState extends State<offers> {
       setState(() {
         this.offer = data.map<Offer>(Offer.fromJson).toList();
         offer.removeWhere((data) => data.role == 0);
+        offer.removeWhere((data) => data.enddate == DateTime.now().toString().split(" ")[0]);
+
         if(offer.isEmpty){
            empty = true;
         }
@@ -83,14 +85,13 @@ Widget buildOffers(List<Offer> offerrss) => ListView.builder(
         },
         child: Container(
           height: 220,
-          //  color: Colors.purple.withOpacity(0.15),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
                 padding: EdgeInsets.all(10),
                 child:
-                Image.asset(offerr.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                Image.network(offerr.picture, height: 130,width: 500,fit: BoxFit.cover,),
               ),
               Text(offerr.Salon,style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
               Text(offerr.name,style: TextStyle(fontSize: 20),),
@@ -105,14 +106,14 @@ Widget buildOffers(List<Offer> offerrss) => ListView.builder(
 class Offer {
   final String name;
   final int role;
-  // final String price;
+  final String enddate;
   final String picture;
   final String Salon;
   final String id;
 
   const Offer({
     required this.name,
-    // required this.price,
+    required this.enddate,
     required this.picture,
     required this.Salon,
     required this.role,
@@ -122,7 +123,7 @@ class Offer {
 
   static Offer fromJson(json) => Offer(
     name: json['name'],
-    // price: json['price'],
+    enddate: json['enddate'],
     picture: json['picture'],
     Salon: json['salonname'],
     role: json['role'],

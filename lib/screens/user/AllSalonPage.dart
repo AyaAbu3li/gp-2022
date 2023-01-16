@@ -96,6 +96,7 @@ class _AllSalonPageState extends State<AllSalonPage> {
                padding: const EdgeInsets.all(15.0),
                 child:
                 Container(
+                  height: 545,
                   child: buildSalons(saloonS),
         ),
       ),
@@ -148,7 +149,7 @@ class _AllSalonPageState extends State<AllSalonPage> {
               children: [
                 Padding(
                   padding: EdgeInsets.all(10),
-                  child: Image.asset(salooon.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                  child: Image.network(salooon.picture, height: 130,width: 500,fit: BoxFit.cover,),
                 ),
                 Padding(
                     padding: const EdgeInsets.all(10),

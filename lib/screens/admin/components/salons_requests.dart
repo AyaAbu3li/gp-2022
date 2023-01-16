@@ -4,7 +4,6 @@ import 'package:purple/screens/admin/admin_screen.dart';
 import 'package:purple/screens/admin/components/salons_details_request.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
-import 'salons_details.dart';
 import 'package:http/http.dart' as http;
 
 class SalonsRequests extends StatefulWidget {
@@ -37,29 +36,6 @@ class _SalonsRequestsState extends State<SalonsRequests> {
         saloon.removeWhere((data) => data.role != 4);
         if(saloon.isEmpty){
            empty = true;
-
-        // showDialog(
-          //   context: context,
-          //   builder: (context) =>
-          //       AlertDialog(
-          //         title: Text('come back later'),
-          //         content: Text("There are no salon requests at the moment"),
-          //         actions: [
-          //           TextButton(
-          //             child: Text('OK',
-          //                 style: TextStyle(
-          //                   fontSize: getProportionateScreenWidth(14),
-          //                   color: Colors.white,)),
-          //             style: TextButton.styleFrom(
-          //               backgroundColor: kPrimaryColor,
-          //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          //             ),
-          //             onPressed: () =>  Navigator.push(
-          //                 context, MaterialPageRoute(builder: (context) => adminScreen())),
-          //           ),
-          //         ],
-          //       ),
-          // );
         }
           circular = false;
       });
@@ -106,7 +82,12 @@ class _SalonsRequestsState extends State<SalonsRequests> {
               children: [
                 Padding(
                   padding: EdgeInsets.all(10),
-                  child: Image.asset(saloon.picture, height: 130,width: 500,fit: BoxFit.cover,),
+                  child: Image.network(
+                      saloon.picture,
+                      height: 130,
+                      width: 500,
+                      fit: BoxFit.cover,
+                  ),
                 ),
                 Padding(
                     padding: const EdgeInsets.all(10),

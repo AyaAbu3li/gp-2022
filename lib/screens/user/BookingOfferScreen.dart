@@ -113,6 +113,25 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
       service.removeWhere((data) => data.owner != offer.id);
     });
 
+    for(
+    int i = int.parse(salon.openTime.split(":")[0]) ;
+    i <= 12;
+    i++){
+      if(i == 11){
+        items.add(i.toString()+":00 AM");
+      } else if(i == 12){
+        items.add(i.toString()+":00 PM");
+      } else {
+        items.add("0" + i.toString() + ":00 AM");
+      }
+    }
+    for(
+    int i = 1 ;
+    i < int.parse(salon.closeTime.split(":")[0]);
+    i++){
+      items.add("0"+i.toString()+":00 PM");
+    }
+
     circular = false;
   }
 
@@ -129,28 +148,7 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
       today = day;
     });
   }
-  List<String> items = [
-    "09:00 AM",
-    "09:30 AM",
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "12:00 PM",
-    "12:30 PM",
-    "01:00 PM",
-    "01:30 PM",
-    "02:00 PM",
-    "02:30 PM",
-    "03:00 PM",
-    "03:30 PM",
-    "04:00 PM",
-    "04:30 PM",
-    "05:00 PM",
-    "05:30 PM",
-    "06:00 PM",
-
-  ];
+  List<String> items = [];
   int current = 0;
 
   @override
@@ -341,7 +339,12 @@ class _BookingOfferScreenState extends State<BookingOfferScreen> {
      SingleChildScrollView(
        child: Column(
         children: [
-          Text("Select the appropriate day ", style: TextStyle(fontSize: 22,color: Colors.purple),),
+          Text("Select the appropriate day ",
+            style:
+            TextStyle(
+                fontSize: 22,
+                color: Colors.purple),
+          ),
           Container(
             child: TableCalendar(
               rowHeight: 45,

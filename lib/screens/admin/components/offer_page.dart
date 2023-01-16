@@ -144,16 +144,8 @@ class _OfferPageRequestState extends State<Offer_Page> {
           ? Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          // SizedBox(height: 20,),
-          // Align(
-          //   alignment: Alignment.center,
-          //   child: Text(
-          //     offer.name,
-          //     style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,),
-          //   ),
-          // ),
           const SizedBox(height: 20),
-          Image.asset(offer.picture,height: 150,width:300,fit: BoxFit.cover,),
+          Image.network(offer.picture,height: 150,width:300,fit: BoxFit.cover,),
           const SizedBox(height: 16,),
           Padding(
             padding: const EdgeInsets.only(left: 15.0),

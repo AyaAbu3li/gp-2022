@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../../components/default_button.dart';
 import '../../../constants.dart';
@@ -10,6 +11,11 @@ import 'change_password.dart';
 import 'package:http/http.dart' as http;
 import 'package:purple/Model/user.dart';
 import 'package:purple/global.dart' as global;
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
+
 
 class account extends StatefulWidget {
   const account({Key? key}) : super(key: key);
@@ -26,6 +32,79 @@ class _accountState extends State<account> {
   String phone ='';
   String namme ='';
   String errorNameImg ="assets/icons/white.svg";
+  File? image;
+  String imageUrl = '';
+
+  Future pickImage(ImageSource source) async {
+    try {
+      final img = await ImagePicker().pickImage(source: source);
+      if(img == null) return;
+      final img_temp = File(img.path);
+
+      setState(() {
+        this.image = img_temp;
+      });
+
+    } on PlatformException catch (e) {
+      print('Failed to pick image: $e');
+    }
+  }
+  void myAlert() {
+    showDialog(
+        context: this.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text('Please choose media to select'),
+            content: Container(
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purple,),
+                    onPressed: () {
+                      pickImage(ImageSource.gallery);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text(' From Gallery',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.purpleAccent,),
+                    //if user click this button. user can upload image from camera
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera),
+                        Text(' From Camera',
+                          style: TextStyle(
+                            fontSize: getProportionateScreenWidth(18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
 
   @override
   void initState() {
@@ -43,7 +122,7 @@ class _accountState extends State<account> {
     var decoded = json.decode(res.body);
     user.name = decoded['name'];
     user.email = decoded['email'];
-    // user.picture = decoded['picture'];
+    user.picture = decoded['picture'];
     user.phone = decoded['phone'].toString();
     circular = false;
 
@@ -51,6 +130,19 @@ class _accountState extends State<account> {
   }
   void edit() async {
     try{
+      if( image != null) {
+        final cloudinary = CloudinaryPublic('dsmn9brrg', 'ul29zf8l');
+
+        CloudinaryResponse resImage = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(image!.path, folder: user.name),
+        );
+
+        setState(() {
+          imageUrl = resImage.secureUrl;
+          user.picture = imageUrl;
+        });
+      }
+
       var res = await http.patch(Uri.parse("http://"+ip+":3000/users/me"),
       headers: <String, String>{
         'Context-Type': 'application/json;charSet=UTF-8',
@@ -59,7 +151,7 @@ class _accountState extends State<account> {
         body: <String, String>{
           'name': user.name,
           'phone': user.phone,
-          // 'picture': user.picture
+          'picture': user.picture
         });
     showDialog(
       context: context,
@@ -110,57 +202,60 @@ class _accountState extends State<account> {
                     child: Column(
                     children: [
 
-                SizedBox( height: 20.0),
+                      SizedBox( height: 20.0),
 
-                Row( children: [
-                  SizedBox(
-                    height: 115,
-                    width: 115,
-                    child: Stack(
-                  clipBehavior: Clip.none, fit: StackFit.expand,
-                  children: [
-                      CircleAvatar(
-                        backgroundImage: AssetImage("assets/images/Profile Image.png"),
-                      ),
-                      Positioned(
-                        right: -16,
-                        bottom: 0,
-                        child: SizedBox(
-                          height: 46,
-                          width: 46,
-                          child: TextButton(
-                            child: Ink.image(image: AssetImage('assets/images/cam.png')
-                              // child: Ink.image(image: NetworkImage
-                            // ('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBxdgiNFnmCxkR1QUu8IKgGOZIMHlu6fbGZA&usqp=CAU'),
+                      Row( children: [
+                        SizedBox(
+                          height: 115,
+                          width: 115,
+                          child: Stack(
+                            clipBehavior: Clip.none, fit: StackFit.expand,
+                            children: [
+                              image != null
+                                  ?
+                              CircleAvatar(
+                                  backgroundImage: new FileImage(image!),
+                                  radius: 200.0)
+                                  :
+                            CircleAvatar(
+                              backgroundImage: NetworkImage(user.picture),
                             ),
-                onPressed: () {
-
-
-                },
-                  style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                  side: BorderSide(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.white,
-                  ),
-                  ),
-                  ),
-                  )
-              ],
-              ),
-              ),
-
-                      SizedBox( width: 50.0),
-
-                      Text(user.name,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                            Positioned(
+                              right: -16,
+                              bottom: 0,
+                              child: SizedBox(
+                                height: 46,
+                                width: 46,
+                                child: TextButton(
+                                  child: Ink.image(image: AssetImage('assets/images/cam.png')
+                                  ),
+                                onPressed: () {
+                                  myAlert();
+                                },
+                                  style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  side: BorderSide(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                        ],
+                          ),
                         ),
-                        ),
-                      ],
+
+                            SizedBox( width: 50.0),
+
+                            Text(user.name,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              ),
+                            ],
                       ),
 
                         const Divider(color: Colors.black54),

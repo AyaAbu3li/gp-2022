@@ -56,7 +56,7 @@ width: double.infinity,
     child: SingleChildScrollView(
       child: Column(
         children: [
-      Image.asset(whoarewe.picture),
+      Image.network(whoarewe.picture),
           Text(
             whoarewe.name,
             style: TextStyle(

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import '../../../size_config.dart';
 import '../salon_screen.dart';
+import 'BookingScreen.dart';
+import 'TodayBookingScreen.dart';
 import 'account.dart';
 import 'addService.dart';
 import 'employee.dart';
 import 'offers.dart';
 import 'make_offer.dart';
-import 'alerts.dart';
+import 'AppointmentPage.dart';
 import 'Help.dart';
 import 'services.dart';
 
@@ -210,10 +212,10 @@ class _BodyState extends State<Body> {
                       Expanded(
                         child: InkWell(
                           onTap:() {
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //   builder: (context) => const Booking(),
-                            // )
-                            // );
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const BookingScreen(),
+                            )
+                            );
                           },
                           child: Container(
                             child: Column(
@@ -293,10 +295,10 @@ class _BodyState extends State<Body> {
                       Expanded(
                         child: InkWell(
                           onTap:() {
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //   builder: (context) => const makeOffer(),
-                            // )
-                            // );
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const TodayBookingScreen(),
+                            )
+                            );
                           },
                           child: Container(
                             child: Column(
@@ -308,7 +310,7 @@ class _BodyState extends State<Body> {
                                 ),
 
                                 SizedBox( height: 10.0),
-                                Text('Chat',
+                                Text('Today Booking',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
